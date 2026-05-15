@@ -102,17 +102,13 @@ const projects = [
 					<h2>Focus</h2>
 					<ul class="focus-list">
 						{
-							focusCategories.map((category, index) => (
+							focusCategories.map((category) => (
 								<li>
 									<button
-										class:list={['focus-button', { active: index === 0 }]}
+										class="focus-button"
 										type="button"
 										data-filter={category.slug}
 									>
-										<svg viewBox="0 0 24 24">
-											<path d="M5 12h14" />
-											<path d="m13 6 6 6-6 6" />
-										</svg>
 										<span>{category.label}</span>
 									</button>
 								</li>
@@ -156,7 +152,7 @@ const projects = [
 			<main class="content-area">
 				<nav class="top-nav" aria-label="主导航">
 					<div class="nav-links">
-						<a class="active" href="/">Home</a>
+						<a class="active" href="/" data-home-filter>Home</a>
 						<a href="/blog">Articles</a>
 						<a href="/blog">Notes</a>
 						<a href="#projects">Projects</a>
@@ -200,7 +196,7 @@ const projects = [
 						<div class="section-heading">
 							<div>
 								<h2 id="recent-title">Recent Articles</h2>
-								<p data-filter-label>All Topics</p>
+								<p data-filter-label>Latest</p>
 							</div>
 							<a href="/blog">View all</a>
 						</div>
@@ -234,7 +230,7 @@ const projects = [
 						<div class="section-heading">
 							<div>
 								<h2 id="projects-title">Featured Projects</h2>
-								<p data-filter-label>All Topics</p>
+								<p data-filter-label>Latest</p>
 							</div>
 							<a href={profile.github} target="_blank" rel="noreferrer">View all</a>
 						</div>
@@ -283,6 +279,7 @@ const projects = [
 			});
 
 			const filterButtons = [...document.querySelectorAll('.focus-button')];
+			const homeFilter = document.querySelector('[data-home-filter]');
 			const filterLabels = document.querySelectorAll('[data-filter-label]');
 			const articleItems = [...document.querySelectorAll('.article-item')];
 			const projectItems = [...document.querySelectorAll('.project-item')];
@@ -290,20 +287,21 @@ const projects = [
 			const emptyProjects = document.querySelector('[data-empty-state="projects"]');
 
 			function applyFilter(slug) {
-				const activeButton =
-					filterButtons.find((button) => button.dataset.filter === slug) ?? filterButtons[0];
-				const activeSlug = activeButton?.dataset.filter ?? 'security';
-				const activeLabel = activeButton?.textContent?.trim() ?? 'Security';
+				const activeButton = filterButtons.find((button) => button.dataset.filter === slug);
+				const activeSlug = activeButton?.dataset.filter ?? 'all';
+				const activeLabel = activeButton?.textContent?.trim() ?? 'Latest';
 
 				filterButtons.forEach((button) => {
 					button.classList.toggle('active', button.dataset.filter === activeSlug);
 				});
+				homeFilter?.classList.toggle('active', activeSlug === 'all');
 
 				filterLabels.forEach((label) => {
 					label.textContent = activeLabel;
 				});
 
-				const showItem = (item) => (item.dataset.categories ?? '').split(' ').includes(activeSlug);
+				const showItem = (item) =>
+					activeSlug === 'all' || (item.dataset.categories ?? '').split(' ').includes(activeSlug);
 				const visibleArticles = articleItems.filter(showItem);
 				const visibleProjects = projectItems.filter(showItem);
 
@@ -318,15 +316,24 @@ const projects = [
 				if (emptyProjects) emptyProjects.hidden = visibleProjects.length > 0;
 
 				const url = new URL(window.location.href);
-				url.searchParams.set('focus', activeSlug);
+				if (activeSlug === 'all') {
+					url.searchParams.delete('focus');
+				} else {
+					url.searchParams.set('focus', activeSlug);
+				}
 				window.history.replaceState({}, '', url);
 			}
+
+			homeFilter?.addEventListener('click', (event) => {
+				event.preventDefault();
+				applyFilter('all');
+			});
 
 			filterButtons.forEach((button) => {
 				button.addEventListener('click', () => applyFilter(button.dataset.filter ?? 'all'));
 			});
 
-			applyFilter(new URLSearchParams(window.location.search).get('focus') ?? 'security');
+			applyFilter(new URLSearchParams(window.location.search).get('focus') ?? 'all');
 		</script>
 	</body>
 </html>
@@ -392,6 +399,7 @@ const projects = [
 		border-radius: 999px;
 		box-shadow: 0 20px 54px rgba(15, 23, 42, 0.18);
 		object-fit: cover;
+		object-position: center;
 	}
 
 	.profile-main h1 {
@@ -453,7 +461,6 @@ const projects = [
 		font-size: 0.88rem;
 	}
 
-	.focus-button,
 	.contact-icon,
 	.theme-toggle,
 	.search-form svg,
@@ -464,7 +471,6 @@ const projects = [
 		color: #4b5563;
 	}
 
-	.focus-button svg,
 	.contact-icon svg,
 	.theme-toggle svg,
 	.search-form svg,
@@ -482,7 +488,6 @@ const projects = [
 		display: flex;
 		width: 100%;
 		min-height: 2.35rem;
-		gap: 0.7rem;
 		justify-content: flex-start;
 		padding: 0 0.7rem;
 		border: 1px solid transparent;
@@ -651,6 +656,7 @@ const projects = [
 		height: 100%;
 		border-radius: 0;
 		object-fit: cover;
+		object-position: center;
 		filter: saturate(0.82) contrast(0.98);
 	}
 
@@ -658,7 +664,7 @@ const projects = [
 		position: absolute;
 		inset: 0;
 		content: '';
-		background: linear-gradient(90deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.24) 48%, transparent);
+		background: linear-gradient(90deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.16) 42%, transparent 68%);
 	}
 
 	.hero-overlay {
@@ -877,7 +883,7 @@ const projects = [
 	}
 
 	:global(body.home-page.dark-mode) .hero-card::after {
-		background: linear-gradient(90deg, rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.22) 52%, transparent);
+		background: linear-gradient(90deg, rgba(15, 23, 42, 0.74), rgba(15, 23, 42, 0.18) 46%, transparent 70%);
 	}
 
 	:global(body.home-page.dark-mode) .eyebrow,
