@@ -47,6 +47,7 @@ const posts = (await getCollection('blog'))
 		...post,
 		categories: getDirectorySlugs(post.data.tags),
 	}));
+const homePosts = posts.slice(0, 3);
 
 const profile = {
 	name: 'Yida',
@@ -184,7 +185,7 @@ const projects = [
 				</nav>
 
 				<section class="hero-card" aria-labelledby="hero-title">
-					<Image src={HeroImage} width={1200} height={520} alt="" />
+					<Image src={HeroImage} width={1200} height={675} alt="" />
 					<div class="hero-overlay">
 						<p class="eyebrow">Digital Garden</p>
 						<h2 id="hero-title">记录系统、学习和工程实践中的长期思考。</h2>
@@ -202,7 +203,7 @@ const projects = [
 						</div>
 						<div class="article-list">
 							{
-								posts.map((post) => (
+								homePosts.map((post) => (
 									<a
 										class="article-item"
 										href={`/blog/${post.id}/`}
@@ -544,7 +545,7 @@ const projects = [
 
 	.content-area {
 		display: grid;
-		grid-template-rows: 2.55rem minmax(13rem, 0.9fr) minmax(19rem, 1.15fr);
+		grid-template-rows: 2.55rem minmax(11.5rem, 0.78fr) minmax(22rem, 1.32fr);
 		gap: 0.9rem;
 		width: 100%;
 		max-width: 78rem;
@@ -647,6 +648,7 @@ const projects = [
 
 	.hero-card {
 		position: relative;
+		background: #0f172a;
 		min-height: 0;
 		overflow: hidden;
 	}
@@ -656,15 +658,15 @@ const projects = [
 		height: 100%;
 		border-radius: 0;
 		object-fit: cover;
-		object-position: center;
-		filter: saturate(0.82) contrast(0.98);
+		object-position: center 62%;
+		filter: saturate(0.96) contrast(1.02);
 	}
 
 	.hero-card::after {
 		position: absolute;
 		inset: 0;
 		content: '';
-		background: linear-gradient(90deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.16) 42%, transparent 68%);
+		background: linear-gradient(90deg, rgba(2, 6, 23, 0.52), rgba(2, 6, 23, 0.16) 42%, transparent 68%);
 	}
 
 	.hero-overlay {
@@ -680,7 +682,7 @@ const projects = [
 		margin: 0 0 0.65rem;
 		padding: 0.42rem 0.78rem;
 		border-radius: 999px;
-		background: rgba(255, 255, 255, 0.72);
+		background: rgba(255, 255, 255, 0.86);
 		color: #111827;
 		font-size: 0.78rem;
 		font-weight: 800;
@@ -688,7 +690,7 @@ const projects = [
 
 	.hero-overlay h2 {
 		margin: 0;
-		color: #030712;
+		color: #ffffff;
 		font-size: clamp(1.45rem, 2.5vw, 2.35rem);
 		line-height: 1.08;
 	}
@@ -738,7 +740,8 @@ const projects = [
 	.project-list {
 		display: grid;
 		flex: 1;
-		gap: 0.75rem;
+		align-content: start;
+		gap: 0.65rem;
 		min-height: 0;
 	}
 
@@ -748,7 +751,7 @@ const projects = [
 
 	.article-item {
 		display: block;
-		padding-bottom: 0.75rem;
+		padding-bottom: 0.65rem;
 		border-bottom: 1px solid rgba(226, 232, 240, 0.9);
 		transition: transform 180ms ease;
 	}
@@ -772,15 +775,15 @@ const projects = [
 	.article-item h3 {
 		margin: 0;
 		color: #0f172a;
-		font-size: 0.96rem;
+		font-size: 0.92rem;
 		line-height: 1.25;
 	}
 
 	.article-item p {
 		display: -webkit-box;
-		margin: 0.35rem 0 0;
+		margin: 0.28rem 0 0;
 		overflow: hidden;
-		font-size: 0.8rem;
+		font-size: 0.77rem;
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 1;
 	}
@@ -789,7 +792,7 @@ const projects = [
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.52rem;
-		margin-top: 0.45rem;
+		margin-top: 0.36rem;
 		color: #6b7280;
 		font-size: 0.7rem;
 	}
@@ -883,7 +886,7 @@ const projects = [
 	}
 
 	:global(body.home-page.dark-mode) .hero-card::after {
-		background: linear-gradient(90deg, rgba(15, 23, 42, 0.74), rgba(15, 23, 42, 0.18) 46%, transparent 70%);
+		background: linear-gradient(90deg, rgba(2, 6, 23, 0.58), rgba(2, 6, 23, 0.18) 44%, transparent 70%);
 	}
 
 	:global(body.home-page.dark-mode) .eyebrow,
