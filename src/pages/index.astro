@@ -8,16 +8,34 @@ import FallbackArticleImage from '../assets/blog-placeholder-5.jpg';
 import HeroImage from '../assets/blog-placeholder-2.jpg';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 
+const focusCategories = [
+	{ label: 'All Topics', slug: 'all' },
+	{ label: 'Federated Learning', slug: 'federated-learning' },
+	{ label: 'Distributed Systems', slug: 'distributed-systems' },
+	{ label: 'Machine Learning', slug: 'machine-learning' },
+	{ label: 'Cloud & Edge Computing', slug: 'cloud-edge-computing' },
+];
+
+const postCategorySlugs = [
+	'machine-learning',
+	'federated-learning',
+	'distributed-systems',
+	'cloud-edge-computing',
+];
+
 const posts = (await getCollection('blog'))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-	.slice(0, 3);
+	.slice(0, 3)
+	.map((post, index) => ({
+		...post,
+		category: postCategorySlugs[index % postCategorySlugs.length],
+	}));
 
 const profile = {
 	name: 'Yida',
 	role: 'Software Engineer & Research Explorer',
 	intro:
 		'专注于构建可靠、可扩展、易理解的系统，也记录工程实践、机器学习和个人研究中的思考。',
-	focus: ['Federated Learning', 'Distributed Systems', 'Machine Learning', 'Cloud & Edge Computing'],
 	github: 'https://github.com/your-github',
 	email: 'your.email@example.com',
 };
@@ -27,16 +45,19 @@ const projects = [
 		name: 'FedEdgeSim',
 		description: '面向边缘场景的层次化联邦学习实验与仿真框架。',
 		href: 'https://github.com/your-github',
+		category: 'federated-learning',
 	},
 	{
 		name: 'Research Notes',
 		description: '整理论文阅读、实验记录和工程复盘的知识库。',
 		href: '/blog',
+		category: 'machine-learning',
 	},
 	{
 		name: 'Blog System',
 		description: '基于 Astro、GitHub 与 Cloudflare Pages 的个人博客。',
 		href: '/blog',
+		category: 'cloud-edge-computing',
 	},
 ];
 ---
@@ -64,15 +85,19 @@ const projects = [
 					<h2>Focus</h2>
 					<ul class="focus-list">
 						{
-							profile.focus.map((item) => (
+							focusCategories.map((category, index) => (
 								<li>
-									<span aria-hidden="true">
+									<button
+										class:list={['focus-button', { active: index === 0 }]}
+										type="button"
+										data-filter={category.slug}
+									>
 										<svg viewBox="0 0 24 24">
 											<path d="M5 12h14" />
 											<path d="m13 6 6 6-6 6" />
 										</svg>
-									</span>
-									{item}
+										<span>{category.label}</span>
+									</button>
 								</li>
 							))
 						}
@@ -156,13 +181,16 @@ const projects = [
 				<div class="content-grid">
 					<section class="card recent-card" aria-labelledby="recent-title">
 						<div class="section-heading">
-							<h2 id="recent-title">Recent Articles</h2>
+							<div>
+								<h2 id="recent-title">Recent Articles</h2>
+								<p data-filter-label>All Topics</p>
+							</div>
 							<a href="/blog">View all</a>
 						</div>
 						<div class="article-list">
 							{
 								posts.map((post) => (
-									<a class="article-item" href={`/blog/${post.id}/`}>
+									<a class="article-item" href={`/blog/${post.id}/`} data-category={post.category}>
 										<div class="article-thumb">
 											<Image
 												width={160}
@@ -186,17 +214,27 @@ const projects = [
 								))
 							}
 						</div>
+						<p class="empty-state" data-empty-state="articles">这个分类下暂时还没有文章。</p>
 					</section>
 
 					<section class="card projects-card" id="projects" aria-labelledby="projects-title">
 						<div class="section-heading">
-							<h2 id="projects-title">Featured Projects</h2>
+							<div>
+								<h2 id="projects-title">Featured Projects</h2>
+								<p data-filter-label>All Topics</p>
+							</div>
 							<a href={profile.github} target="_blank" rel="noreferrer">View all</a>
 						</div>
 						<div class="project-list">
 							{
 								projects.map((project) => (
-									<a class="project-item" href={project.href} target="_blank" rel="noreferrer">
+									<a
+										class="project-item"
+										href={project.href}
+										target="_blank"
+										rel="noreferrer"
+										data-category={project.category}
+									>
 										<span class="project-icon" aria-hidden="true">
 											<svg viewBox="0 0 24 24">
 												<path d="m12 3 8 4.5-8 4.5-8-4.5L12 3Z" />
@@ -212,6 +250,7 @@ const projects = [
 								))
 							}
 						</div>
+						<p class="empty-state" data-empty-state="projects">这个分类下暂时还没有项目。</p>
 					</section>
 				</div>
 			</main>
@@ -229,6 +268,56 @@ const projects = [
 				document.body.classList.toggle('dark-mode');
 				localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
 			});
+
+			const filterButtons = [...document.querySelectorAll('.focus-button')];
+			const filterLabels = document.querySelectorAll('[data-filter-label]');
+			const articleItems = [...document.querySelectorAll('.article-item')];
+			const projectItems = [...document.querySelectorAll('.project-item')];
+			const emptyArticles = document.querySelector('[data-empty-state="articles"]');
+			const emptyProjects = document.querySelector('[data-empty-state="projects"]');
+
+			function applyFilter(slug) {
+				const activeButton =
+					filterButtons.find((button) => button.dataset.filter === slug) ?? filterButtons[0];
+				const activeSlug = activeButton?.dataset.filter ?? 'all';
+				const activeLabel = activeButton?.textContent?.trim() ?? 'All Topics';
+
+				filterButtons.forEach((button) => {
+					button.classList.toggle('active', button.dataset.filter === activeSlug);
+				});
+
+				filterLabels.forEach((label) => {
+					label.textContent = activeLabel;
+				});
+
+				const showItem = (item) => activeSlug === 'all' || item.dataset.category === activeSlug;
+				const visibleArticles = articleItems.filter(showItem);
+				const visibleProjects = projectItems.filter(showItem);
+
+				articleItems.forEach((item) => {
+					item.hidden = !showItem(item);
+				});
+				projectItems.forEach((item) => {
+					item.hidden = !showItem(item);
+				});
+
+				if (emptyArticles) emptyArticles.hidden = visibleArticles.length > 0;
+				if (emptyProjects) emptyProjects.hidden = visibleProjects.length > 0;
+
+				const url = new URL(window.location.href);
+				if (activeSlug === 'all') {
+					url.searchParams.delete('focus');
+				} else {
+					url.searchParams.set('focus', activeSlug);
+				}
+				window.history.replaceState({}, '', url);
+			}
+
+			filterButtons.forEach((button) => {
+				button.addEventListener('click', () => applyFilter(button.dataset.filter ?? 'all'));
+			});
+
+			applyFilter(new URLSearchParams(window.location.search).get('focus') ?? 'all');
 		</script>
 	</body>
 </html>
@@ -279,7 +368,7 @@ const projects = [
 		height: 100svh;
 		padding: 2rem;
 		border-right: 1px solid rgba(148, 163, 184, 0.22);
-		overflow: hidden;
+		overflow: clip;
 	}
 
 	.profile-main {
@@ -347,7 +436,6 @@ const projects = [
 		list-style: none;
 	}
 
-	.focus-list li,
 	.contact-list a {
 		display: flex;
 		align-items: center;
@@ -356,7 +444,7 @@ const projects = [
 		font-size: 0.88rem;
 	}
 
-	.focus-list span,
+	.focus-button,
 	.contact-icon,
 	.theme-toggle,
 	.search-form svg,
@@ -367,7 +455,7 @@ const projects = [
 		color: #4b5563;
 	}
 
-	.focus-list svg,
+	.focus-button svg,
 	.contact-icon svg,
 	.theme-toggle svg,
 	.search-form svg,
@@ -379,6 +467,43 @@ const projects = [
 		stroke-linecap: round;
 		stroke-linejoin: round;
 		stroke-width: 1.8;
+	}
+
+	.focus-button {
+		display: flex;
+		width: 100%;
+		min-height: 2.35rem;
+		gap: 0.7rem;
+		justify-content: flex-start;
+		padding: 0 0.7rem;
+		border: 1px solid transparent;
+		border-radius: 0.8rem;
+		background: transparent;
+		color: #111827;
+		cursor: pointer;
+		font: inherit;
+		font-size: 0.88rem;
+		font-weight: 700;
+		transition:
+			background 180ms ease,
+			border-color 180ms ease,
+			transform 180ms ease;
+	}
+
+	.focus-button:hover,
+	.focus-button.active {
+		border-color: rgba(209, 213, 219, 0.78);
+		background: rgba(255, 255, 255, 0.74);
+		transform: translateX(2px);
+	}
+
+	.focus-button:focus {
+		outline: none;
+	}
+
+	.focus-button:focus-visible {
+		outline: 2px solid #2563eb;
+		outline-offset: 2px;
 	}
 
 	.contact-list a {
@@ -557,10 +682,13 @@ const projects = [
 		display: grid;
 		grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.85fr);
 		gap: 1rem;
+		height: 100%;
 		min-height: 0;
 	}
 
 	.card {
+		display: flex;
+		flex-direction: column;
 		min-height: 0;
 		padding: 1.1rem;
 		overflow: hidden;
@@ -579,6 +707,13 @@ const projects = [
 		font-size: 1rem;
 	}
 
+	.section-heading p {
+		margin: 0.18rem 0 0;
+		color: #64748b;
+		font-size: 0.74rem;
+		font-weight: 700;
+	}
+
 	.section-heading a {
 		color: #4b5563;
 		font-size: 0.82rem;
@@ -587,7 +722,13 @@ const projects = [
 	.article-list,
 	.project-list {
 		display: grid;
+		flex: 1;
 		gap: 0.75rem;
+		min-height: 0;
+	}
+
+	.project-list {
+		grid-auto-rows: 1fr;
 	}
 
 	.article-item {
@@ -597,6 +738,12 @@ const projects = [
 		padding-bottom: 0.75rem;
 		border-bottom: 1px solid rgba(226, 232, 240, 0.9);
 		transition: transform 180ms ease;
+	}
+
+	.article-item[hidden],
+	.project-item[hidden],
+	.empty-state[hidden] {
+		display: none;
 	}
 
 	.article-item:last-child {
@@ -659,6 +806,7 @@ const projects = [
 		display: grid;
 		grid-template-columns: 3rem minmax(0, 1fr);
 		gap: 0.75rem;
+		align-items: start;
 		padding: 0.8rem;
 		border: 1px solid rgba(226, 232, 240, 0.86);
 		border-radius: 1rem;
@@ -695,8 +843,20 @@ const projects = [
 		-webkit-line-clamp: 2;
 	}
 
+	.empty-state {
+		display: grid;
+		place-items: center;
+		flex: 1;
+		margin: 0;
+		border: 1px dashed rgba(148, 163, 184, 0.5);
+		border-radius: 1rem;
+		color: #64748b;
+		font-size: 0.86rem;
+		text-align: center;
+	}
+
 	:global(body.home-page.dark-mode) .profile-main h1,
-	:global(body.home-page.dark-mode) .focus-list li,
+	:global(body.home-page.dark-mode) .focus-button,
 	:global(body.home-page.dark-mode) .contact-list a,
 	:global(body.home-page.dark-mode) .hero-overlay h2,
 	:global(body.home-page.dark-mode) .article-item h3,
@@ -708,8 +868,10 @@ const projects = [
 	:global(body.home-page.dark-mode) .panel-section p,
 	:global(body.home-page.dark-mode) .article-item p,
 	:global(body.home-page.dark-mode) .project-item small,
+	:global(body.home-page.dark-mode) .section-heading p,
 	:global(body.home-page.dark-mode) .section-heading a,
-	:global(body.home-page.dark-mode) .contact-list small {
+	:global(body.home-page.dark-mode) .contact-list small,
+	:global(body.home-page.dark-mode) .empty-state {
 		color: #cbd5e1;
 	}
 
@@ -728,6 +890,8 @@ const projects = [
 	:global(body.home-page.dark-mode) .eyebrow,
 	:global(body.home-page.dark-mode) .nav-links a.active,
 	:global(body.home-page.dark-mode) .nav-links a:hover,
+	:global(body.home-page.dark-mode) .focus-button:hover,
+	:global(body.home-page.dark-mode) .focus-button.active,
 	:global(body.home-page.dark-mode) .article-meta span:first-child {
 		background: rgba(30, 41, 59, 0.86);
 		color: #e5e7eb;
@@ -739,6 +903,10 @@ const projects = [
 
 	:global(body.home-page.dark-mode) .project-item {
 		border-color: rgba(71, 85, 105, 0.72);
+	}
+
+	:global(body.home-page.dark-mode) .empty-state {
+		border-color: rgba(71, 85, 105, 0.8);
 	}
 
 	@media (max-width: 1180px) {
