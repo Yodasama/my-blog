@@ -183,8 +183,7 @@ const projects = [
 				<section class="hero-card" aria-labelledby="hero-title">
 					<img class="hero-image" src="/images/background.jpg" width="1200" height="675" alt="" loading="eager" />
 					<div class="hero-overlay">
-						<p class="eyebrow">Digital Garden</p>
-						<h2 id="hero-title">记录系统、学习和工程实践中的长期思考。</h2>
+						<h2 id="hero-title">We are what we repeatedly do.</h2>
 					</div>
 				</section>
 
@@ -659,7 +658,7 @@ const projects = [
 		height: 100%;
 		border-radius: 0;
 		object-fit: cover;
-		object-position: center 58%;
+		object-position: center 54%;
 		filter: saturate(0.96) contrast(1.02);
 	}
 
@@ -673,27 +672,18 @@ const projects = [
 	.hero-overlay {
 		position: absolute;
 		left: clamp(1.2rem, 3vw, 2.4rem);
-		bottom: clamp(1.2rem, 3vw, 2.2rem);
+		bottom: clamp(1.35rem, 3.4vw, 2.5rem);
 		z-index: 1;
-		max-width: 30rem;
-	}
-
-	.eyebrow {
-		display: inline-flex;
-		margin: 0 0 0.65rem;
-		padding: 0.42rem 0.78rem;
-		border-radius: 999px;
-		background: rgba(255, 255, 255, 0.86);
-		color: #111827;
-		font-size: 0.78rem;
-		font-weight: 800;
+		max-width: min(34rem, 76%);
 	}
 
 	.hero-overlay h2 {
 		margin: 0;
 		color: #ffffff;
-		font-size: clamp(1.45rem, 2.5vw, 2.35rem);
-		line-height: 1.08;
+		font-size: clamp(1.35rem, 2.15vw, 2.05rem);
+		font-weight: 800;
+		line-height: 1.12;
+		text-wrap: balance;
 	}
 
 	.content-grid {
@@ -897,7 +887,6 @@ const projects = [
 		background: linear-gradient(90deg, rgba(2, 6, 23, 0.58), rgba(2, 6, 23, 0.18) 44%, transparent 70%);
 	}
 
-	:global(body.home-page.dark-mode) .eyebrow,
 	:global(body.home-page.dark-mode) .nav-links a.active,
 	:global(body.home-page.dark-mode) .nav-links a:hover,
 	:global(body.home-page.dark-mode) .focus-button:hover,
