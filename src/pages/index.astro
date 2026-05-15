@@ -1,9 +1,7 @@
 ---
-import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import HeroImage from '../assets/hero/background.jpg';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 
 const toSlug = (value: string) =>
@@ -183,7 +181,7 @@ const projects = [
 				</nav>
 
 				<section class="hero-card" aria-labelledby="hero-title">
-					<Image class="hero-image" src={HeroImage} width={1200} height={675} alt="" loading="eager" />
+					<img class="hero-image" src="/images/background.jpg" width="1200" height="675" alt="" loading="eager" />
 					<div class="hero-overlay">
 						<p class="eyebrow">Digital Garden</p>
 						<h2 id="hero-title">记录系统、学习和工程实践中的长期思考。</h2>
@@ -545,7 +543,7 @@ const projects = [
 
 	.content-area {
 		display: grid;
-		grid-template-rows: 2.55rem minmax(10.5rem, 0.7fr) minmax(23.5rem, 1.45fr);
+		grid-template-rows: 2.55rem minmax(11rem, 0.78fr) minmax(22rem, 1.38fr);
 		gap: 0.9rem;
 		width: 100%;
 		max-width: 78rem;
@@ -743,18 +741,24 @@ const projects = [
 	.project-list {
 		display: grid;
 		flex: 1;
-		align-content: start;
-		gap: 0.48rem;
+		align-content: stretch;
 		min-height: 0;
 	}
 
+	.article-list {
+		grid-auto-rows: minmax(0, 1fr);
+	}
+
 	.project-list {
+		gap: 0.7rem;
 		grid-auto-rows: 1fr;
 	}
 
 	.article-item {
-		display: block;
-		padding-bottom: 0.48rem;
+		display: flex;
+		align-items: center;
+		min-height: 0;
+		padding-block: clamp(0.45rem, 1.2vh, 0.8rem);
 		border-bottom: 1px solid rgba(226, 232, 240, 0.9);
 		transition: transform 180ms ease;
 	}
@@ -778,15 +782,15 @@ const projects = [
 	.article-item h3 {
 		margin: 0;
 		color: #0f172a;
-		font-size: 0.88rem;
+		font-size: clamp(0.88rem, 1.2vh, 0.98rem);
 		line-height: 1.25;
 	}
 
 	.article-item p {
 		display: -webkit-box;
-		margin: 0.22rem 0 0;
+		margin: clamp(0.18rem, 0.5vh, 0.34rem) 0 0;
 		overflow: hidden;
-		font-size: 0.73rem;
+		font-size: clamp(0.73rem, 1vh, 0.8rem);
 		line-height: 1.35;
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 1;
@@ -796,9 +800,9 @@ const projects = [
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.42rem;
-		margin-top: 0.28rem;
+		margin-top: clamp(0.22rem, 0.55vh, 0.4rem);
 		color: #6b7280;
-		font-size: 0.66rem;
+		font-size: clamp(0.66rem, 0.9vh, 0.72rem);
 	}
 
 	.article-meta span:first-child {
