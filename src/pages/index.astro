@@ -3,7 +3,6 @@ import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import AvatarImage from '../assets/profile/panda.JPG';
 import HeroImage from '../assets/hero/background.jpg';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 
@@ -54,15 +53,15 @@ const profile = {
 	role: 'Software Engineer & Research Explorer',
 	intro:
 		'专注于构建可靠、可扩展、易理解的系统，也记录工程实践、机器学习和个人研究中的思考。',
-	github: 'https://github.com/your-github',
-	email: 'your.email@example.com',
+	github: 'https://github.com/Yodasama',
+	email: 'yidaaa2269@163.com',
 };
 
 const projects = [
 	{
 		name: 'FedEdgeSim',
 		description: '面向边缘场景的层次化联邦学习实验与仿真框架。',
-		href: 'https://github.com/your-github',
+		href: 'https://github.com/Yodasama',
 		categories: ['agent', 'development'],
 	},
 	{
@@ -89,7 +88,7 @@ const projects = [
 		<div class="site-shell">
 			<aside class="profile-panel" aria-label="个人信息">
 				<div class="profile-main">
-					<Image class="avatar" src={AvatarImage} width={180} height={180} alt={`${profile.name} avatar`} />
+					<img class="avatar" src="/images/panda.JPG" width="180" height="180" alt={`${profile.name} avatar`} />
 					<h1>{profile.name}</h1>
 					<p>{profile.role}</p>
 				</div>
@@ -131,7 +130,7 @@ const projects = [
 							</span>
 							<span>
 								<strong>GitHub</strong>
-								<small>github.com/your-github</small>
+								<small>github.com/Yodasama</small>
 							</span>
 						</a>
 						<a href={`mailto:${profile.email}`}>
@@ -487,6 +486,7 @@ const projects = [
 
 	.focus-button {
 		display: flex;
+		align-items: center;
 		width: 100%;
 		min-height: 2.35rem;
 		justify-content: flex-start;
@@ -499,6 +499,7 @@ const projects = [
 		font: inherit;
 		font-size: 0.88rem;
 		font-weight: 700;
+		line-height: 1;
 		transition:
 			background 180ms ease,
 			border-color 180ms ease,
