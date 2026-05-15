@@ -3,32 +3,49 @@ import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import AvatarImage from '../assets/blog-placeholder-about.jpg';
-import FallbackArticleImage from '../assets/blog-placeholder-5.jpg';
-import HeroImage from '../assets/blog-placeholder-2.jpg';
+import AvatarImage from '../assets/profile/panda.JPG';
+import HeroImage from '../assets/hero/background.jpg';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 
+const toSlug = (value: string) =>
+	value
+		.toLowerCase()
+		.trim()
+		.replace(/&/g, 'and')
+		.replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
+		.replace(/^-|-$/g, '');
+
 const focusCategories = [
-	{ label: 'All Topics', slug: 'all' },
-	{ label: 'Federated Learning', slug: 'federated-learning' },
-	{ label: 'Distributed Systems', slug: 'distributed-systems' },
-	{ label: 'Machine Learning', slug: 'machine-learning' },
-	{ label: 'Cloud & Edge Computing', slug: 'cloud-edge-computing' },
+	{ label: 'Security', slug: 'security' },
+	{ label: 'Agent', slug: 'agent' },
+	{ label: 'Network', slug: 'network' },
+	{ label: 'Development', slug: 'development' },
 ];
 
-const postCategorySlugs = [
-	'machine-learning',
-	'federated-learning',
-	'distributed-systems',
-	'cloud-edge-computing',
-];
+const tagDirectoryMap: Record<string, string> = {
+	security: 'security',
+	'面经': 'security',
+	tool: 'security',
+	agent: 'agent',
+	network: 'network',
+	web: 'network',
+	http: 'network',
+	code: 'development',
+	'题解': 'development',
+	development: 'development',
+};
+
+const getDirectorySlugs = (tags: string[]) => {
+	const slugs = tags.map((tag) => tagDirectoryMap[toSlug(tag)]).filter(Boolean);
+	return [...new Set(slugs.length > 0 ? slugs : ['development'])];
+};
 
 const posts = (await getCollection('blog'))
+	.filter((post) => !post.data.draft)
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-	.slice(0, 3)
-	.map((post, index) => ({
+	.map((post) => ({
 		...post,
-		category: postCategorySlugs[index % postCategorySlugs.length],
+		categories: getDirectorySlugs(post.data.tags),
 	}));
 
 const profile = {
@@ -45,19 +62,19 @@ const projects = [
 		name: 'FedEdgeSim',
 		description: '面向边缘场景的层次化联邦学习实验与仿真框架。',
 		href: 'https://github.com/your-github',
-		category: 'federated-learning',
+		categories: ['agent', 'development'],
 	},
 	{
 		name: 'Research Notes',
 		description: '整理论文阅读、实验记录和工程复盘的知识库。',
 		href: '/blog',
-		category: 'machine-learning',
+		categories: ['security'],
 	},
 	{
 		name: 'Blog System',
 		description: '基于 Astro、GitHub 与 Cloudflare Pages 的个人博客。',
 		href: '/blog',
-		category: 'cloud-edge-computing',
+		categories: ['development'],
 	},
 ];
 ---
@@ -190,15 +207,11 @@ const projects = [
 						<div class="article-list">
 							{
 								posts.map((post) => (
-									<a class="article-item" href={`/blog/${post.id}/`} data-category={post.category}>
-										<div class="article-thumb">
-											<Image
-												width={160}
-												height={120}
-												src={post.data.heroImage ?? FallbackArticleImage}
-												alt=""
-											/>
-										</div>
+									<a
+										class="article-item"
+										href={`/blog/${post.id}/`}
+										data-categories={post.categories.join(' ')}
+									>
 										<div>
 											<h3>{post.data.title}</h3>
 											<p>{post.data.description}</p>
@@ -233,7 +246,7 @@ const projects = [
 										href={project.href}
 										target="_blank"
 										rel="noreferrer"
-										data-category={project.category}
+										data-categories={project.categories.join(' ')}
 									>
 										<span class="project-icon" aria-hidden="true">
 											<svg viewBox="0 0 24 24">
@@ -279,8 +292,8 @@ const projects = [
 			function applyFilter(slug) {
 				const activeButton =
 					filterButtons.find((button) => button.dataset.filter === slug) ?? filterButtons[0];
-				const activeSlug = activeButton?.dataset.filter ?? 'all';
-				const activeLabel = activeButton?.textContent?.trim() ?? 'All Topics';
+				const activeSlug = activeButton?.dataset.filter ?? 'security';
+				const activeLabel = activeButton?.textContent?.trim() ?? 'Security';
 
 				filterButtons.forEach((button) => {
 					button.classList.toggle('active', button.dataset.filter === activeSlug);
@@ -290,7 +303,7 @@ const projects = [
 					label.textContent = activeLabel;
 				});
 
-				const showItem = (item) => activeSlug === 'all' || item.dataset.category === activeSlug;
+				const showItem = (item) => (item.dataset.categories ?? '').split(' ').includes(activeSlug);
 				const visibleArticles = articleItems.filter(showItem);
 				const visibleProjects = projectItems.filter(showItem);
 
@@ -305,11 +318,7 @@ const projects = [
 				if (emptyProjects) emptyProjects.hidden = visibleProjects.length > 0;
 
 				const url = new URL(window.location.href);
-				if (activeSlug === 'all') {
-					url.searchParams.delete('focus');
-				} else {
-					url.searchParams.set('focus', activeSlug);
-				}
+				url.searchParams.set('focus', activeSlug);
 				window.history.replaceState({}, '', url);
 			}
 
@@ -317,7 +326,7 @@ const projects = [
 				button.addEventListener('click', () => applyFilter(button.dataset.filter ?? 'all'));
 			});
 
-			applyFilter(new URLSearchParams(window.location.search).get('focus') ?? 'all');
+			applyFilter(new URLSearchParams(window.location.search).get('focus') ?? 'security');
 		</script>
 	</body>
 </html>
@@ -732,9 +741,7 @@ const projects = [
 	}
 
 	.article-item {
-		display: grid;
-		grid-template-columns: 4.6rem minmax(0, 1fr);
-		gap: 0.85rem;
+		display: block;
 		padding-bottom: 0.75rem;
 		border-bottom: 1px solid rgba(226, 232, 240, 0.9);
 		transition: transform 180ms ease;
@@ -754,20 +761,6 @@ const projects = [
 	.article-item:hover,
 	.project-item:hover {
 		transform: translateX(2px);
-	}
-
-	.article-thumb {
-		aspect-ratio: 1;
-		overflow: hidden;
-		border-radius: 0.75rem;
-		background: #e5e7eb;
-	}
-
-	.article-thumb img {
-		width: 100%;
-		height: 100%;
-		border-radius: 0;
-		object-fit: cover;
 	}
 
 	.article-item h3 {
@@ -997,13 +990,8 @@ const projects = [
 			font-size: 0.8rem;
 		}
 
-		.article-item,
 		.project-item {
 			grid-template-columns: 1fr;
-		}
-
-		.article-thumb {
-			aspect-ratio: 16 / 9;
 		}
 	}
 
