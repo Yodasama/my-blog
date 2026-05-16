@@ -787,6 +787,13 @@ def embed_query(self,text:str) -> List[float]:
 **向量存储到Milvus**
 `VectorStoreManager`封装了`langchain_milvus.Milvus`，将LangChain Document对象直接批量写入Milvus，字段映射关系如下
 
-| LangChain字段 | Milvus Collection字段 | 说明  |
-| ----------- | ------------------- | --- |
-|             |                     |     |
+| LangChain字段  | Milvus Collection字段 |              说明               |
+| :----------: | :-----------------: | :---------------------------: |
+| page_content |       content       |             文本内容              |
+|   向量（自动计算）   |       vector        |         1024维float向量          |
+|   id(UUID)   |         id          |              主键               |
+|   metadata   |      metadata       | JSON元数据（含_source、\_file_name等 |
+初始化时链接Milvus：
+```python
+
+```
