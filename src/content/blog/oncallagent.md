@@ -796,6 +796,8 @@ def embed_query(self,text:str) -> List[float]:
 初始化时链接Milvus：
 ```python
 self.vector_store = Milvus(
-	embedding
+	embedding_function = vector_embedding_service,
+	collection_name = "biz",
+	connection_args = {"host":config.milvus_host,}
 )
 ```
