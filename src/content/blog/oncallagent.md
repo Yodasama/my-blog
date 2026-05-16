@@ -910,5 +910,14 @@ def embed_query(self,text:str) -> List[float]:
 **构建搜索参数并执行向量检索**
 使用PyMilvus的collection.search进行相似度查询 获取距离最近的向量数据
 ```python
-
+# 构建搜索参数
+search_params = {
+	"metric_type":"L2",
+	"params":{"nprobe": 10},
+	# 搜索时探测的cluster数量 越大越精确 但是越慢
+}
+	
+# 执行搜索
+results = 
+}
 ```
