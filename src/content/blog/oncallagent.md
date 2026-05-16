@@ -827,5 +827,6 @@ def add_documents(self,documents:List[Document]) -> List[str]:
 ```
 在重新索引同一个文件前，会先按_source路径删除旧数据
 ```python
-def delete_by_source(sle)
+def delete_by_source(self,file_path:str) -> int:
+
 ```
