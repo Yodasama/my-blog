@@ -705,5 +705,8 @@ def DocumentSplitterService:
 ```
 Markdown文档完整的三阶段分割逻辑
 ```python
-def split_markdown(self,content:str,file_path:str = "") -> 
+def split_markdown(self,content:str,file_path:str = "") -> List[Document]:
+	"分割Markdown文档（两阶段分割 + 合并小片段）"
+	# 第一阶段 按标题分割
+	md_docs = self.markdown_splitter.split_documents()
 ```
