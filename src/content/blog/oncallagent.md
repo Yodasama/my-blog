@@ -898,4 +898,10 @@ def search_similar_documents(self, query:str, top_k:int = 3) -> List[SearchResul
 query_vector = vector_embedding_service.embed_query(query)
 # 2.embed_query的实现（复用入库时相同的API 无额外开销
 def embed_query(self,text:str) -> List[float]:
+	"嵌入单个查询文本 返回单条向量"
+	response = self.client.embeddings.create(
+		model = self.model,
+		input = text,
+		dimensions = self.dimensions,
+	)
 ```
