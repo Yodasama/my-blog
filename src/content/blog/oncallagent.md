@@ -613,7 +613,7 @@ RAG：先检索 再生成。
 3. 速度更快
 4. 准确率更高
 
-## 代码实现- Python
+## 代码实现 - 存储 - Python
 
 实现知识库Agent的上半部分：文件向量化后存储到数据库
 
@@ -833,5 +833,7 @@ def delete_by_source(self,file_path:str) -> int:
 	# metadata是Json字段 使用Json路径查询语法
 	expr = f'metadata["_source"] == "{file_path}"'
 	result = collection.delete(expr)
-	deleted_count  
+	deleted_count = result.delete_count if hassttr(result,"delete_count") else 0
+	logger.info(f"删除文件旧数据:{file_path},删除数量:{deleted_count}")
+	return deleted_count
 ```
