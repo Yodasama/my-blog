@@ -923,7 +923,6 @@ results = collection.search(
 	anns_field = "vector",
 	param = search_params,
 	limit = top_k,
-	
+	output_fields = ["id","content","metadata"],
 )
-}
 ```
