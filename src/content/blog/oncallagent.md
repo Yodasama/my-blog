@@ -926,3 +926,7 @@ results = collection.search(
 	output_fields = ["id","content","metadata"],
 )
 ```
+搜索结果封装到SearchResult对象中，score为L2欧氏距离，越小表示越相似
+```python
+class SeaerchResult
+```
