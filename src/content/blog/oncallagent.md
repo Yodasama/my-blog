@@ -841,3 +841,6 @@ def delete_by_source(self,file_path:str) -> int:
 流程：
 1. 将查询文本向量化
 2. 相似度查询
+search_similar_documents是底层召回的完整实现
+```p
+```
