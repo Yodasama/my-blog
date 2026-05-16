@@ -713,5 +713,11 @@ def split_markdown(self,content:str,file_path:str = "") -> List[Document]:
 	# 第二阶段 按大小进一步分割
 	docs_after_split = self.text_splitter.split——documents(md_docs)
 	
-	# 第三阶段 合并ta
+	# 第三阶段 合并太小的分片（<300字符）
+	final_docs = self._merge_small_chunks(docs_after_split,min_size = 300)
+	
+	# 添加文件路径元数据
+	for doc in final_docs:
+		doc.metadate["_source"] = file_path
+		doc.meta
 ```
