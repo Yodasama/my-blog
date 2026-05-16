@@ -731,5 +731,16 @@ def _merge_small_chunks(self,documents:List[Document],min_size:int = 300) -> Lis
 	merged_docs = []
 	current_doc = None
 	
-	for doc in docu
+	for doc in documents:
+		doc_size = len(doc.page_content)
+		
+		if current_doc is None:
+			current_doc = doc
+		elif doc_size < min_size and len(current_doc.page_content < self.chunk_size \* 2):
+			# 当前分片太小且合并后不会太大 则合并
+			current_doc.page_content += "\n\n" + doc.page_content
+		else:
+			# 保存当前文档，开始新文档
+			merged_docs.append(current_doc)
+			current_doc = doc
 ```
