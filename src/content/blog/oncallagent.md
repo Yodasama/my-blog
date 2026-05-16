@@ -774,5 +774,14 @@ def embed_documents(self,texts:List[Str]) -> List[float]:
 	)
 	return [item.embedding for item in response.data]
 	
-def embed_query(self,text:str )
+def embed_query(self,text:str) -> List[float]:
+	"嵌入单个查询文本 返回单条向量"
+	response = self.client.embeddings.create(
+		model = self.model,
+		input = text,
+		dimensions = self.dimensions,
+		encoding_format = "float"
+	)
+	return response.data[0].embedding
 ```
+
