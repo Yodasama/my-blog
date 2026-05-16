@@ -1,10 +1,12 @@
 ---
-title: '常用的渗透工具'
-description: '记录常用的渗透工具'
-pubDate: '2026-05-09T17:12:25+08:00'
+title: 常用的渗透工具
+summary: 记录常用的渗透工具
+Date: 2026-05-09
 draft: false
 toc: true
-tags: ['Security', 'Tool']
+tags:
+  - Security
+  - Tool
 ---
 ## 信息收集
 

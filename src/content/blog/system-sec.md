@@ -1,10 +1,12 @@
 ---
-title: '系统的安全加固'
-description: 'Linux and Windows的安全加固'
-pubDate: '2026-05-12T16:20:41+08:00'
-draft: false
+title: '"system-sec"'
+date: 2026-05-12
+summary: Linux and Windows的安全加固
+tags:
+  - Security
+  - 面经
 toc: true
-tags: ['Security', '面经']
+draft: false
 ---
 # Linux基线加固与排查
 

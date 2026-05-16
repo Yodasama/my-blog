@@ -1,10 +1,12 @@
 ---
-title: '网络安全面经'
-description: '记录网安常用的面试题'
-pubDate: '2026-05-08T11:06:13+08:00'
+title: 网络安全面经
+date: 2026-05-08
+summary: 网络安全常见的面试内容
+tags:
+  - Security
+  - 面经
 draft: false
 toc: true
-tags: ['security', '面经']
 ---
 # 基础漏洞知识
 
@@ -350,7 +352,7 @@ passthru() # 执行外部程序，并将原始输出直接传递到浏览器/终
   				 # 通常用于二进制流或需要原样输出的场景。
 ```
 
-```python
+```Python
 os.system() # 调用系统shell执行命令
 subprocess.Popen(shell=True) # 这是更底层、更强大的进程控制方式
 ```
@@ -447,7 +449,7 @@ POST /api/edit
 
 1. 服务端做资源归属校验
 
-```python
+```Python
 order = Order.get(id=order_id)
 
 # 正确
@@ -459,7 +461,7 @@ order = Order.get(
 
 2. 不信任前端传输的user_id
 
-```python
+```Python
 user_id = request.json["user_id"]
 
 # 正确
@@ -506,7 +508,7 @@ POST /updateProfile
 
 1. 后端强制RBAC权限控制
 
-```python
+```Python
 if current_user.role != "admin":
     return 403
 ```
@@ -545,7 +547,7 @@ Redis：
 
 用户输入的文件路径未做安全校验
 
-```python
+```Python
 filename = request.GET["file"]
 open("/var/www/uploads/" + filename)
 
@@ -688,7 +690,7 @@ XStream
 
 ## Python反序列化
 
-```python
+```Python
 pickle
 pickle.loads(user_input)
 # pickle 在反序列化时可以恢复复杂对象，并且可能触发对象中的特殊方法
@@ -719,7 +721,7 @@ SOAP
 
 攻击流程：
 
-```python
+```Python
 扫描 WebLogic 端口
 确认版本
 利用 T3/IIOP/XMLDecoder
@@ -1061,7 +1063,7 @@ ip=127.0.0.1;cat /etc/passwd
 
 反弹Shell特征
 
-```shell
+```Shell
 # Bash TCP
 bash -i >& /dev/tcp/
 # nc
