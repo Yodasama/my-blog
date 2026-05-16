@@ -319,7 +319,7 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 					.prose :global(h2),
 					.prose :global(h3),
 					.prose :global(h4) {
-						scroll-margin-top: 86px;
+						scroll-margin-top: 116px;
 						color: #20242c;
 						line-height: 1.3;
 						letter-spacing: 0;
@@ -484,9 +484,7 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 								<p class="toc-label">Sections</p>
 								{secondarySections.length > 0 ? (
 									<>
-										<p class="empty-toc secondary-placeholder" data-secondary-empty>
-											选择左侧二级标题后显示对应的小节。
-										</p>
+										<div class="secondary-placeholder" data-secondary-empty></div>
 										{secondarySections.map((section) => (
 											<div
 												class="secondary-panel"
