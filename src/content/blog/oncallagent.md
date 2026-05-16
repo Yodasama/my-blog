@@ -785,4 +785,8 @@ def embed_query(self,text:str) -> List[float]:
 	return response.data[0].embedding
 ```
 **向量存储到Milvus**
-`VectorStoreManager`封装了`langchain_milvus.Milvus`，将LangChain Document对象直接批量写入Milvus
+`VectorStoreManager`封装了`langchain_milvus.Milvus`，将LangChain Document对象直接批量写入Milvus，字段映射关系如下
+
+| LangChain字段 | Milvus Collection字段 | 说明  |
+| ----------- | ------------------- | --- |
+|             |                     |     |
