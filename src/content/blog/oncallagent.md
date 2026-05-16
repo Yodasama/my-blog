@@ -229,7 +229,7 @@ Agent：只给任务目标，大模型自己实时决定每一步做什么，根
 
 ### 真实的Agent样子
 
-```Python
+```python
 def run_agent(user_message):
   messages = [
     {"role":"system","content":System Prompt},
@@ -261,7 +261,7 @@ def run_agent(user_message):
 4. parameters（参数定义）：告诉大模型怎么填参数
    1. JSON Schema格式来定义：定义工具有哪些内容需要填，每个空里填什么类型的数据
 
-```Python
+```python
 # 函数本体 大模型看不到 Agent负责执行
 import requests
 
@@ -625,14 +625,14 @@ app/services/vector_index_service.py
 
 传入文件路径file_path , 使用pathlib.path读取文件内容到内存
 
-```Python
+```python
 # index_single_file函数 读取文件内容
 content = path.read_text(encoding="utf-8")
 ```
 
 Index_single_file是索引单个文件的入口方法，完整实现如下
 
-```Python
+```python
 def index_single_file(self,file_path:str):
   """
   索引单个文件（LangChain分割器
@@ -754,5 +754,9 @@ Embedding生成
 `DashScopeEmbeddings`实现LangChain标准的Embeddings接口，通过阿里云DashScope的OpenAI兼容模式调用`text-embedding-v4`模型，生成1024维向量
 ```python
 class DashScopeEmbeddings(Embeddings):
-	def __init__
+	def __init__(self,api_key:str,model:str = "text-embedding-v4"),
+		self.client = OpenAI(
+			api_key = api_key
+			base_url = 
+		)
 ```
