@@ -1,16 +1,6 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseHead from '../../components/BaseHead.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
-
-const toSlug = (value: string) =>
-	value
-		.toLowerCase()
-		.trim()
-		.replace(/&/g, 'and')
-		.replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
-		.replace(/^-|-$/g, '');
+import BaseHead from '../components/BaseHead.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 
 const focusCategories = [
 	{ label: 'Security', slug: 'security' },
@@ -18,32 +8,6 @@ const focusCategories = [
 	{ label: 'Network', slug: 'network' },
 	{ label: 'Development', slug: 'development' },
 ];
-
-const tagDirectoryMap: Record<string, string> = {
-	security: 'security',
-	'面经': 'security',
-	tool: 'security',
-	agent: 'agent',
-	network: 'network',
-	web: 'network',
-	http: 'network',
-	code: 'development',
-	'题解': 'development',
-	development: 'development',
-};
-
-const getDirectorySlugs = (tags: string[]) => {
-	const slugs = tags.map((tag) => tagDirectoryMap[toSlug(tag)]).filter(Boolean);
-	return [...new Set(slugs.length > 0 ? slugs : ['development'])];
-};
-
-const posts = (await getCollection('blog'))
-	.filter((post) => !post.data.draft)
-	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-	.map((post) => ({
-		...post,
-		categories: getDirectorySlugs(post.data.tags),
-	}));
 
 const profile = {
 	name: 'Yida',
@@ -53,14 +17,41 @@ const profile = {
 	github: 'https://github.com/Yodasama',
 	email: 'yidaaa2269@163.com',
 };
+
+const projects = [
+	{
+		name: 'FedEdgeSim',
+		description: '面向边缘场景的层次化联邦学习实验与仿真框架。',
+		href: 'https://github.com/Yodasama',
+		status: 'Active',
+		categories: ['agent', 'development'],
+		tags: ['Federated Learning', 'Simulation', 'Edge AI'],
+	},
+	{
+		name: 'Research Notes',
+		description: '整理论文阅读、实验记录和工程复盘的知识库。',
+		href: '/blog',
+		status: 'Growing',
+		categories: ['security'],
+		tags: ['Research', 'Security', 'Notes'],
+	},
+	{
+		name: 'Blog System',
+		description: '基于 Astro、GitHub 与 Cloudflare Pages 的个人博客。',
+		href: '/',
+		status: 'Live',
+		categories: ['development'],
+		tags: ['Astro', 'Cloudflare Pages', 'Frontend'],
+	},
+];
 ---
 
 <!doctype html>
 <html lang="zh-CN">
 	<head>
-		<BaseHead title={`Articles | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+		<BaseHead title={`Projects | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
 	</head>
-	<body class="articles-page">
+	<body class="projects-page">
 		<div class="site-shell">
 			<aside class="profile-panel" aria-label="个人信息">
 				<div class="profile-main">
@@ -125,8 +116,8 @@ const profile = {
 				<nav class="top-nav" aria-label="主导航">
 					<div class="nav-links">
 						<a href="/">Home</a>
-						<a class="active" href="/blog">Articles</a>
-						<a href="/projects">Projects</a>
+						<a href="/blog">Articles</a>
+						<a class="active" href="/projects">Projects</a>
 						<a href="/about">About</a>
 					</div>
 					<div class="nav-tools">
@@ -154,38 +145,44 @@ const profile = {
 					</div>
 				</nav>
 
-				<section class="articles-panel" aria-labelledby="articles-title">
-					<div class="articles-heading">
+				<section class="projects-panel" aria-labelledby="projects-title">
+					<div class="projects-heading">
 						<div>
-							<p>All Posts</p>
-							<h2 id="articles-title">Articles</h2>
+							<p>Selected Work</p>
+							<h2 id="projects-title">Projects</h2>
 						</div>
-						<span>{posts.length} posts</span>
+						<span>{projects.length} projects</span>
 					</div>
 
-					<div class="articles-scroll">
-						<div class="article-stack">
+					<div class="projects-scroll">
+						<div class="project-stack">
 							{
-								posts.map((post) => (
-									<a class="article-card" href={`/blog/${post.id}/`} data-categories={post.categories.join(' ')}>
-										<div class="article-card-main">
-											<h3>{post.data.title}</h3>
-											<p>{post.data.description}</p>
+								projects.map((project) => (
+									<a class="project-card" href={project.href} data-categories={project.categories.join(' ')}>
+										<div class="project-icon-large" aria-hidden="true">
+											<svg viewBox="0 0 24 24">
+												<path d="m12 3 8 4.5-8 4.5-8-4.5L12 3Z" />
+												<path d="m20 12-8 4.5L4 12" />
+												<path d="m20 16.5-8 4.5-8-4.5" />
+											</svg>
+										</div>
+										<div class="project-card-main">
+											<div class="project-title-row">
+												<h3>{project.name}</h3>
+												<span>{project.status}</span>
+											</div>
+											<p>{project.description}</p>
 											<div class="tag-list">
-												{post.data.tags.map((tag) => (
+												{project.tags.map((tag) => (
 													<span>{tag}</span>
 												))}
 											</div>
-										</div>
-										<div class="article-card-meta">
-											<FormattedDate date={post.data.pubDate} />
-											<small>6 min read</small>
 										</div>
 									</a>
 								))
 							}
 						</div>
-						<p class="empty-state" data-empty-state>这个分类下暂时还没有文章。</p>
+						<p class="empty-state" data-empty-state>这个分类下暂时还没有项目。</p>
 					</div>
 				</section>
 			</main>
@@ -205,7 +202,7 @@ const profile = {
 			});
 
 			const filterButtons = [...document.querySelectorAll('.focus-button')];
-			const articleCards = [...document.querySelectorAll('.article-card')];
+			const projectCards = [...document.querySelectorAll('.project-card')];
 			const emptyState = document.querySelector('[data-empty-state]');
 
 			function applyFilter(slug) {
@@ -218,9 +215,9 @@ const profile = {
 
 				const showCard = (card) =>
 					activeSlug === 'all' || (card.dataset.categories ?? '').split(' ').includes(activeSlug);
-				const visibleCards = articleCards.filter(showCard);
+				const visibleCards = projectCards.filter(showCard);
 
-				articleCards.forEach((card) => {
+				projectCards.forEach((card) => {
 					card.hidden = !showCard(card);
 				});
 				if (emptyState) emptyState.hidden = visibleCards.length > 0;
@@ -244,7 +241,7 @@ const profile = {
 </html>
 
 <style>
-	:global(body.articles-page) {
+	:global(body.projects-page) {
 		min-height: 100vh;
 		background:
 			radial-gradient(circle at 78% 8%, rgba(72, 122, 255, 0.12), transparent 34rem),
@@ -257,14 +254,14 @@ const profile = {
 			color 180ms ease;
 	}
 
-	:global(body.articles-page.dark-mode) {
+	:global(body.projects-page.dark-mode) {
 		background:
 			radial-gradient(circle at 78% 8%, rgba(96, 165, 250, 0.16), transparent 34rem),
 			linear-gradient(90deg, #0f172a 0, #0f172a 19.5rem, #111827 19.5rem);
 		color: #e5e7eb;
 	}
 
-	:global(body.articles-page a) {
+	:global(body.projects-page a) {
 		color: inherit;
 		text-decoration: none;
 	}
@@ -316,7 +313,7 @@ const profile = {
 
 	.profile-main p,
 	.panel-section p,
-	.article-card p {
+	.project-card p {
 		color: #4b5563;
 	}
 
@@ -541,7 +538,7 @@ const profile = {
 		color: #9ca3af;
 	}
 
-	.articles-panel {
+	.projects-panel {
 		display: flex;
 		flex-direction: column;
 		min-height: 0;
@@ -552,7 +549,7 @@ const profile = {
 		overflow: hidden;
 	}
 
-	.articles-heading {
+	.projects-heading {
 		display: flex;
 		align-items: flex-end;
 		justify-content: space-between;
@@ -561,7 +558,7 @@ const profile = {
 		border-bottom: 1px solid rgba(226, 232, 240, 0.9);
 	}
 
-	.articles-heading p {
+	.projects-heading p {
 		margin: 0 0 0.2rem;
 		color: #64748b;
 		font-size: 0.78rem;
@@ -570,20 +567,20 @@ const profile = {
 		text-transform: uppercase;
 	}
 
-	.articles-heading h2 {
+	.projects-heading h2 {
 		margin: 0;
 		color: #0f172a;
 		font-size: clamp(1.8rem, 3vw, 3rem);
 		line-height: 1;
 	}
 
-	.articles-heading span {
+	.projects-heading span {
 		color: #64748b;
 		font-size: 0.86rem;
 		font-weight: 700;
 	}
 
-	.articles-scroll {
+	.projects-scroll {
 		flex: 1;
 		min-height: 0;
 		overflow-y: auto;
@@ -591,17 +588,17 @@ const profile = {
 		scrollbar-gutter: stable;
 	}
 
-	.article-stack {
+	.project-stack {
 		display: grid;
 		gap: 0.85rem;
 	}
 
-	.article-card {
+	.project-card {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto;
+		grid-template-columns: 4rem minmax(0, 1fr);
 		gap: 1rem;
-		align-items: start;
-		padding: 1rem;
+		align-items: center;
+		padding: 1.05rem;
 		border: 1px solid rgba(226, 232, 240, 0.92);
 		border-radius: 1rem;
 		background: rgba(255, 255, 255, 0.72);
@@ -611,31 +608,68 @@ const profile = {
 			transform 180ms ease;
 	}
 
-	.article-card:hover {
+	.project-card:hover {
 		border-color: rgba(148, 163, 184, 0.6);
 		box-shadow: 0 14px 38px rgba(15, 23, 42, 0.08);
 		transform: translateY(-1px);
 	}
 
-	.article-card[hidden],
+	.project-card[hidden],
 	.empty-state[hidden] {
 		display: none;
 	}
 
-	.article-card h3 {
+	.project-card h3 {
 		margin: 0;
 		color: #0f172a;
-		font-size: 1.05rem;
+		font-size: 1.08rem;
 		line-height: 1.25;
 	}
 
-	.article-card p {
+	.project-card p {
 		display: -webkit-box;
 		margin: 0.42rem 0 0;
 		overflow: hidden;
 		font-size: 0.88rem;
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2;
+	}
+
+	.project-icon-large {
+		display: grid;
+		place-items: center;
+		width: 4rem;
+		height: 4rem;
+		border-radius: 1rem;
+		background: #dbeafe;
+		color: #2563eb;
+	}
+
+	.project-icon-large svg {
+		width: 1.55rem;
+		height: 1.55rem;
+		fill: none;
+		stroke: currentColor;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		stroke-width: 1.8;
+	}
+
+	.project-title-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.project-title-row span {
+		flex: 0 0 auto;
+		padding: 0.18rem 0.6rem;
+		border-radius: 999px;
+		background: #ecfdf5;
+		color: #047857;
+		font-size: 0.72rem;
+		font-weight: 800;
 	}
 
 	.tag-list {
@@ -654,20 +688,6 @@ const profile = {
 		font-weight: 700;
 	}
 
-	.article-card-meta {
-		display: grid;
-		justify-items: end;
-		gap: 0.24rem;
-		color: #64748b;
-		font-size: 0.78rem;
-		white-space: nowrap;
-	}
-
-	.article-card-meta small {
-		color: #94a3b8;
-		font-size: 0.72rem;
-	}
-
 	.empty-state {
 		display: grid;
 		place-items: center;
@@ -680,51 +700,57 @@ const profile = {
 		text-align: center;
 	}
 
-	:global(body.articles-page.dark-mode) .profile-main h1,
-	:global(body.articles-page.dark-mode) .focus-button,
-	:global(body.articles-page.dark-mode) .contact-list a,
-	:global(body.articles-page.dark-mode) .articles-heading h2,
-	:global(body.articles-page.dark-mode) .article-card h3 {
+	:global(body.projects-page.dark-mode) .profile-main h1,
+	:global(body.projects-page.dark-mode) .focus-button,
+	:global(body.projects-page.dark-mode) .contact-list a,
+	:global(body.projects-page.dark-mode) .projects-heading h2,
+	:global(body.projects-page.dark-mode) .project-card h3 {
 		color: #f9fafb;
 	}
 
-	:global(body.articles-page.dark-mode) .profile-main p,
-	:global(body.articles-page.dark-mode) .panel-section p,
-	:global(body.articles-page.dark-mode) .article-card p,
-	:global(body.articles-page.dark-mode) .articles-heading p,
-	:global(body.articles-page.dark-mode) .articles-heading span,
-	:global(body.articles-page.dark-mode) .contact-list small,
-	:global(body.articles-page.dark-mode) .empty-state {
+	:global(body.projects-page.dark-mode) .profile-main p,
+	:global(body.projects-page.dark-mode) .panel-section p,
+	:global(body.projects-page.dark-mode) .project-card p,
+	:global(body.projects-page.dark-mode) .projects-heading p,
+	:global(body.projects-page.dark-mode) .projects-heading span,
+	:global(body.projects-page.dark-mode) .contact-list small,
+	:global(body.projects-page.dark-mode) .empty-state {
 		color: #cbd5e1;
 	}
 
-	:global(body.articles-page.dark-mode) .articles-panel,
-	:global(body.articles-page.dark-mode) .theme-toggle,
-	:global(body.articles-page.dark-mode) .search-form {
+	:global(body.projects-page.dark-mode) .projects-panel,
+	:global(body.projects-page.dark-mode) .theme-toggle,
+	:global(body.projects-page.dark-mode) .search-form {
 		border-color: rgba(71, 85, 105, 0.8);
 		background: rgba(15, 23, 42, 0.78);
 	}
 
-	:global(body.articles-page.dark-mode) .article-card {
+	:global(body.projects-page.dark-mode) .project-card {
 		border-color: rgba(71, 85, 105, 0.72);
 		background: rgba(15, 23, 42, 0.52);
 	}
 
-	:global(body.articles-page.dark-mode) .nav-links a.active,
-	:global(body.articles-page.dark-mode) .nav-links a:hover,
-	:global(body.articles-page.dark-mode) .focus-button:hover,
-	:global(body.articles-page.dark-mode) .focus-button.active,
-	:global(body.articles-page.dark-mode) .tag-list span {
+	:global(body.projects-page.dark-mode) .nav-links a.active,
+	:global(body.projects-page.dark-mode) .nav-links a:hover,
+	:global(body.projects-page.dark-mode) .focus-button:hover,
+	:global(body.projects-page.dark-mode) .focus-button.active,
+	:global(body.projects-page.dark-mode) .tag-list span,
+	:global(body.projects-page.dark-mode) .project-title-row span {
 		background: rgba(30, 41, 59, 0.86);
 		color: #e5e7eb;
 	}
 
-	:global(body.articles-page.dark-mode) .search-form input {
+	:global(body.projects-page.dark-mode) .project-icon-large {
+		background: rgba(37, 99, 235, 0.18);
+		color: #93c5fd;
+	}
+
+	:global(body.projects-page.dark-mode) .search-form input {
 		color: #f9fafb;
 	}
 
-	:global(body.articles-page.dark-mode) .articles-heading,
-	:global(body.articles-page.dark-mode) .empty-state {
+	:global(body.projects-page.dark-mode) .projects-heading,
+	:global(body.projects-page.dark-mode) .empty-state {
 		border-color: rgba(71, 85, 105, 0.8);
 	}
 
@@ -733,7 +759,7 @@ const profile = {
 			grid-template-columns: 17rem minmax(0, 1fr);
 		}
 
-		:global(body.articles-page) {
+		:global(body.projects-page) {
 			background:
 				radial-gradient(circle at 78% 8%, rgba(72, 122, 255, 0.12), transparent 34rem),
 				linear-gradient(90deg, #f5f7fb 0, #f5f7fb 17rem, #ffffff 17rem);
@@ -749,12 +775,12 @@ const profile = {
 	}
 
 	@media (max-width: 900px) {
-		:global(body.articles-page),
-		:global(body.articles-page.dark-mode) {
+		:global(body.projects-page),
+		:global(body.projects-page.dark-mode) {
 			background: #f8fafc;
 		}
 
-		:global(body.articles-page.dark-mode) {
+		:global(body.projects-page.dark-mode) {
 			background: #111827;
 		}
 
@@ -798,12 +824,12 @@ const profile = {
 			width: auto;
 		}
 
-		.articles-panel {
+		.projects-panel {
 			margin-top: 1rem;
 			max-height: none;
 		}
 
-		.articles-scroll {
+		.projects-scroll {
 			overflow: visible;
 		}
 	}
@@ -815,14 +841,22 @@ const profile = {
 			font-size: 0.8rem;
 		}
 
-		.articles-heading,
-		.article-card {
+		.projects-heading,
+		.project-card {
 			display: block;
 		}
 
-		.article-card-meta {
-			justify-items: start;
-			margin-top: 0.8rem;
+		.project-icon-large {
+			margin-bottom: 0.9rem;
+		}
+
+		.project-title-row {
+			display: block;
+		}
+
+		.project-title-row span {
+			display: inline-flex;
+			margin-top: 0.55rem;
 		}
 	}
 
