@@ -894,5 +894,8 @@ def search_similar_documents(self, query:str, top_k:int = 3) -> List[SearchResul
 **查询文本向量化**
 首先对用户问题进行向量化，调用`DashScopeEmbeddings.embed_query`，通过DashScope OpenAI兼容接口获取1024维向量：
 ```python
-
+# 1.将查询文本向量化
+query_vector = vector_embedding_service.embed_query(query)
+# 2.embed_query的实现（复用入库时相同的API 无额外开销
+def embed_query(self,text:str) -> List[float]:
 ```
