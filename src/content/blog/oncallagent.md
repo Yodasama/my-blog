@@ -798,6 +798,11 @@ def embed_query(self,text:str) -> List[float]:
 self.vector_store = Milvus(
 	embedding_function = vector_embedding_service,
 	collection_name = "biz",
-	connection_args = {"host":config.milvus_host,}
+	connection_args = {"host":config.milvus_host,"port":config.milvus_port},
+	auto_id = False,
+	drop_old = False,
+	text_field = "vector",
+	primary_field = "id",
+	metadata_field = "metadata",
 )
 ```
