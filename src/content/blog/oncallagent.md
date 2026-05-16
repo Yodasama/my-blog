@@ -762,3 +762,4 @@ class DashScopeEmbeddings(Embeddings):
 		self.model = model
 		self.dimensions = dimensions
 ```
+批量向量化文档(embed_documents) 和 单挑查询向量化(emv)

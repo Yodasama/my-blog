@@ -279,6 +279,8 @@ const projects = [
 			const filterLabels = document.querySelectorAll('[data-filter-label]');
 			const articleItems = [...document.querySelectorAll('.article-item')];
 			const projectItems = [...document.querySelectorAll('.project-item')];
+			const articleList = document.querySelector('.article-list');
+			const projectList = document.querySelector('.project-list');
 			const emptyArticles = document.querySelector('[data-empty-state="articles"]');
 			const emptyProjects = document.querySelector('[data-empty-state="projects"]');
 
@@ -310,6 +312,8 @@ const projects = [
 
 				if (emptyArticles) emptyArticles.hidden = visibleArticles.length > 0;
 				if (emptyProjects) emptyProjects.hidden = visibleProjects.length > 0;
+				if (articleList) articleList.hidden = visibleArticles.length === 0;
+				if (projectList) projectList.hidden = visibleProjects.length === 0;
 
 				const url = new URL(window.location.href);
 				if (activeSlug === 'all') {
@@ -731,12 +735,12 @@ const projects = [
 	.project-list {
 		display: grid;
 		flex: 1;
-		align-content: stretch;
 		min-height: 0;
 	}
 
 	.article-list {
-		grid-auto-rows: minmax(0, 1fr);
+		align-content: stretch;
+		grid-template-rows: repeat(4, minmax(4.15rem, 1fr));
 	}
 
 	.project-list {
@@ -755,6 +759,8 @@ const projects = [
 
 	.article-item[hidden],
 	.project-item[hidden],
+	.article-list[hidden],
+	.project-list[hidden],
 	.empty-state[hidden] {
 		display: none;
 	}
