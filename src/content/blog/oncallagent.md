@@ -813,5 +813,10 @@ def add_documents(self,documents:List[Document]) -> List[str]:
 	start_time = time.time()
 	
 	# 为每个文档生成唯一UUID（auto_id = False时必须手动提供
-	ids = [str(uuid.uuid4())]
+	ids = [str(uuid.uuid4()) for _ in documents]
+	
+	# LangChain Milvus 的add_documents 自动调用 Embedding_function 批量向量话并写入
+	result_ids = self.vector_store.add_documents(documents,ids = ids)
+	
+	elapsed = time.time() - start
 ```
