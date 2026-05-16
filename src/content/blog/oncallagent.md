@@ -759,4 +759,6 @@ class DashScopeEmbeddings(Embeddings):
 			api_key = api_key
 			base_url = "https://dashcope.aliyuncs.com/compatible-mode/v1"
 		)
+		self.model = model
+		self.dimensions = dimensions
 ```

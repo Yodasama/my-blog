@@ -537,6 +537,55 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						</main>
 					</div>
 				</div>
+				<script>
+					const selectors = Array.from(document.querySelectorAll('.secondary-selector'));
+					const panels = Array.from(document.querySelectorAll('.secondary-panel'));
+					const placeholder = document.querySelector('[data-secondary-empty]');
+
+					const showPanel = (panelId) => {
+						const activePanel = panels.find((panel) => panel.getAttribute('data-secondary-panel') === panelId);
+
+						panels.forEach((panel) => {
+							panel.toggleAttribute('hidden', panel !== activePanel);
+						});
+						selectors.forEach((selector) => {
+							selector.classList.toggle(
+								'active',
+								selector.getAttribute('data-secondary-target') === panelId,
+							);
+						});
+
+						if (placeholder) {
+							placeholder.toggleAttribute('hidden', Boolean(activePanel));
+						}
+					};
+
+					const showPanelFromHash = () => {
+						const slug = decodeURIComponent(window.location.hash.slice(1));
+						if (!slug) return;
+
+						const directSelector = selectors.find(
+							(selector) => selector.getAttribute('href') === `#${slug}`,
+						);
+						if (directSelector) {
+							showPanel(directSelector.getAttribute('data-secondary-target'));
+							return;
+						}
+
+						const containingPanel = panels.find((panel) => panel.querySelector(`a[href="#${slug}"]`));
+						if (containingPanel) {
+							showPanel(containingPanel.getAttribute('data-secondary-panel'));
+						}
+					};
+
+					selectors.forEach((selector) => {
+						selector.addEventListener('click', () => {
+							showPanel(selector.getAttribute('data-secondary-target'));
+						});
+					});
+					window.addEventListener('hashchange', showPanelFromHash);
+					showPanelFromHash();
+				</script>
 			</body>
 		</html>
 	) : (
