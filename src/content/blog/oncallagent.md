@@ -864,6 +864,13 @@ def search_similar_documents(self, query:str, top_k:int = 3) -> List[SearchResul
 	
 	# 3.构建搜索参数
 	search_params = {
-		"metric_type":"L2"
+		"metric_type":"L2" #欧氏距离 与入库时的索引类型保持一致
+		"params":{"nprobe":10},	
 	}
+	
+	# 4.执行搜索
+	results = collection.search(
+		data = [query_vector],
+		
+	)
 ```
