@@ -818,5 +818,14 @@ def add_documents(self,documents:List[Document]) -> List[str]:
 	# LangChain Milvus 的add_documents 自动调用 Embedding_function 批量向量话并写入
 	result_ids = self.vector_store.add_documents(documents,ids = ids)
 	
-	elapsed = time.time() - start
+	elapsed = time.time() - start_time
+	logger.info(
+		f"批量添加{len(documents)}个文档完成，"
+		f"耗时:{elapsed:.2f}秒，平均：{elapsed/len(documents):.2f}秒/个"
+	)
+	return result_ids
+```
+在重新索引同一个文件前，会先按_source路径删除旧数据
+```python
+def delete_by_source(sle)
 ```
