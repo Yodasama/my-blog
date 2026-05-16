@@ -795,5 +795,7 @@ def embed_query(self,text:str) -> List[float]:
 |   metadata   |      metadata       | JSON元数据（含_source、\_file_name等 |
 初始化时链接Milvus：
 ```python
-
+self.vector_store = Milvus(
+	embedding
+)
 ```

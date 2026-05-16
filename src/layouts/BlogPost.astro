@@ -79,6 +79,7 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 				<BaseHead title={title} description={metaDescription} />
 				<style>
 					:global(html) {
+						scroll-padding-top: 128px;
 						scroll-behavior: smooth;
 					}
 					:global(body) {
@@ -539,6 +540,10 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 					const selectors = Array.from(document.querySelectorAll('.secondary-selector'));
 					const panels = Array.from(document.querySelectorAll('.secondary-panel'));
 					const placeholder = document.querySelector('[data-secondary-empty]');
+					const readerLinks = Array.from(
+						document.querySelectorAll('.primary-toc a[href^="#"], .secondary-toc a[href^="#"]'),
+					);
+					const scrollOffset = 128;
 
 					const showPanel = (panelId) => {
 						const activePanel = panels.find((panel) => panel.getAttribute('data-secondary-panel') === panelId);
@@ -576,6 +581,28 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						}
 					};
 
+					const scrollToSlug = (slug) => {
+						const target = document.getElementById(slug);
+						if (!target) return;
+
+						const top = target.getBoundingClientRect().top + window.scrollY - scrollOffset;
+						window.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' });
+					};
+
+					readerLinks.forEach((link) => {
+						link.addEventListener('click', (event) => {
+							const slug = decodeURIComponent(link.getAttribute('href').slice(1));
+							event.preventDefault();
+
+							if (link.classList.contains('secondary-selector')) {
+								showPanel(link.getAttribute('data-secondary-target'));
+							}
+
+							window.history.pushState({}, '', `#${encodeURIComponent(slug)}`);
+							scrollToSlug(slug);
+						});
+					});
+
 					selectors.forEach((selector) => {
 						selector.addEventListener('click', () => {
 							showPanel(selector.getAttribute('data-secondary-target'));
@@ -583,6 +610,11 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 					});
 					window.addEventListener('hashchange', showPanelFromHash);
 					showPanelFromHash();
+					if (window.location.hash) {
+						window.setTimeout(() => {
+							scrollToSlug(decodeURIComponent(window.location.hash.slice(1)));
+						}, 0);
+					}
 				</script>
 			</body>
 		</html>
