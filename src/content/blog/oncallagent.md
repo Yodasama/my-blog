@@ -688,6 +688,8 @@ def DocumentSplitterService:
 	
 	# 第一阶段：Markdown 标题分割器（按# 和 ## 切分）
 	Self.markdown_splitter = MarkdownHeaderTextSplitter(
-		headers_to_split_on
+		headers_to_split_on=[
+		
+		]
 	)
 ```
