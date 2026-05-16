@@ -918,6 +918,12 @@ search_params = {
 }
 	
 # 执行搜索
-results = 
+results = collection.search(
+	data = [query_vector],
+	anns_field = "vector",
+	param = search_params,
+	limit = top_k,
+	
+)
 }
 ```
