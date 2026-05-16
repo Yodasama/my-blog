@@ -751,3 +751,8 @@ def _merge_small_chunks(self,documents:List[Document],min_size:int = 300) -> Lis
 ```
 **文件索引** - 向量化和存储到数据库
 Embedding生成
+`DashScopeEmbeddings`实现LangChain标准的Embeddings接口，通过阿里云DashScope的OpenAI兼容模式调用`text-embedding-v4`模型，生成1024维向量
+```python
+class DashScopeEmbeddings(Embeddings):
+	def __init__
+```
