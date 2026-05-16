@@ -679,3 +679,15 @@ def index_single_file(self,file_path:str):
 1. 按Markdown标题（#、##）切分，将文档分割成多个章节
 2. 对每个章节使用 RecursiveCharacterTextSplitter 进行二次分割，超过chunk_size \* 2 的章节会被拆分
 3. 合并过小的分片（<300字符），避免过度碎片化 同时通过chunk_overlap保持分片间的上下文语义连贯
+DocumentSplitterService初始化时会配置好两个分割器
+```python
+def DocumentSplitterService:
+	def __init__(self):
+	self.chunk_size = config.chunk_max_size   # 默认800
+	self.chunk_overlap = config.chunk_overlap # 默认100
+	
+	# 第一阶段：Markdown 标题分割器（按# 和 ## 切分）
+	Self.markdown_splitter = MarkdownHeaderTextSplitter(
+		headers_to_split_on
+	)
+```
