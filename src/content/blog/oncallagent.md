@@ -766,5 +766,13 @@ class DashScopeEmbeddings(Embeddings):
 ```python
 def embed_documents(self,texts:List[Str]) -> List[float]:
 	"批量嵌入文档列表 返回向量列表"
-	response = self.client
+	response = self.client.embedding.create(
+		model = self.model,
+		input = texts,
+		dimensions = self.dimensions,
+		encoding_format = "float"
+	)
+	return [item.embedding for item in response.data]
+	
+def embed_query(self,text:str )
 ```
