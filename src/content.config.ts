@@ -6,18 +6,27 @@ const blog = defineCollection({
 	// Load Markdown and MDX files in the `src/content/blog/` directory.
 	loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
 	// Type-check frontmatter using a schema
-	schema: ({ image }) =>
+	schema: z.preprocess(
+		(data) => {
+			if (!data || typeof data !== 'object' || Array.isArray(data)) {
+				return data;
+			}
+
+			const frontmatter = data as Record<string, unknown>;
+			return {
+				...frontmatter,
+				date: frontmatter.date ?? frontmatter.Date,
+			};
+		},
 		z.object({
 			title: z.string(),
-			description: z.string(),
-			// Transform string to Date object
-			pubDate: z.coerce.date(),
-			updatedDate: z.coerce.date().optional(),
-			heroImage: z.optional(image()),
+			date: z.coerce.date(),
+			summary: z.string().default(''),
 			tags: z.array(z.string()).default([]),
-			draft: z.boolean().default(false),
 			toc: z.boolean().default(false),
+			draft: z.boolean().default(false),
 		}),
+	),
 });
 
 export const collections = { blog };

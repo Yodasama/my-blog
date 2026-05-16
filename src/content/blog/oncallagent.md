@@ -689,7 +689,15 @@ def DocumentSplitterService:
 	# 第一阶段：Markdown 标题分割器（按# 和 ## 切分）
 	Self.markdown_splitter = MarkdownHeaderTextSplitter(
 		headers_to_split_on=[
+			("#", "h1")
+			("##","h2")
+		],
+		strip_headers = False, # 保留标题在内容中
+	)
+	
+	# 第二阶段：递归字符分割器（用于二次分割）
+	self.text_splitter = RecursiveCharacterTextSplitter(
+		chunk_size = self.chunk_size \* 2,
 		
-		]
 	)
 ```

@@ -39,7 +39,7 @@ const getDirectorySlugs = (tags: string[]) => {
 
 const posts = (await getCollection('blog'))
 	.filter((post) => !post.data.draft)
-	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
 	.map((post) => ({
 		...post,
 		categories: getDirectorySlugs(post.data.tags),
@@ -170,7 +170,7 @@ const profile = {
 									<a class="article-card" href={`/blog/${post.id}/`} data-categories={post.categories.join(' ')}>
 										<div class="article-card-main">
 											<h3>{post.data.title}</h3>
-											<p>{post.data.description}</p>
+											<p>{post.data.summary}</p>
 											<div class="tag-list">
 												{post.data.tags.map((tag) => (
 													<span>{tag}</span>
@@ -178,7 +178,7 @@ const profile = {
 											</div>
 										</div>
 										<div class="article-card-meta">
-											<FormattedDate date={post.data.pubDate} />
+											<FormattedDate date={post.data.date} />
 											<small>6 min read</small>
 										</div>
 									</a>
