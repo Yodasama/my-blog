@@ -871,6 +871,11 @@ def search_similar_documents(self, query:str, top_k:int = 3) -> List[SearchResul
 	# 4.执行搜索
 	results = collection.search(
 		data = [query_vector],
-		
+		anns_field = "vector",
+		param = seaerch_params,
+		limit = top_k,
+		output_fields = ["id","content","meradata"],
 	)
+	
+	# t.
 ```

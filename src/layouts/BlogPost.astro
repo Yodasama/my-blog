@@ -438,10 +438,33 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						padding: 16px;
 						border: 1px dashed var(--border-modifier-border);
 						border-radius: var(--border-radius-s);
-						background: var(--border-pattern-light);
-						color: var(--border-text-muted);
+						background: var(--border-pattern-light) !important;
+						color: var(--border-text-muted) !important;
 						font-size: 0.88rem;
 						white-space: pre-wrap;
+					}
+					.prose pre span {
+						color: var(--border-text-muted) !important;
+					}
+					.prose pre span[style*='#6A737D'],
+					.prose pre span[style*='color:#6A737D'] {
+						color: var(--border-text-faint) !important;
+					}
+					.prose pre span[style*='#FDAEB7'],
+					.prose pre span[style*='color:#FDAEB7'] {
+						color: var(--border-cyan) !important;
+					}
+					.prose pre span[style*='#9ECBFF'],
+					.prose pre span[style*='color:#9ECBFF'] {
+						color: var(--border-green) !important;
+					}
+					.prose pre span[style*='#B392F0'],
+					.prose pre span[style*='color:#B392F0'] {
+						color: var(--border-pink) !important;
+					}
+					.prose pre span[style*='#79B8FF'],
+					.prose pre span[style*='color:#79B8FF'] {
+						color: var(--border-purple) !important;
 					}
 					.prose code {
 						padding: 0.15rem 0.35rem;
