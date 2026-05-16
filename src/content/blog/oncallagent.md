@@ -903,5 +903,7 @@ def embed_query(self,text:str) -> List[float]:
 		model = self.model,
 		input = text,
 		dimensions = self.dimensions,
+		encoding_format = "float"
 	)
+	return response.data[0].embedding
 ```
