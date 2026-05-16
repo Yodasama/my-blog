@@ -83,9 +83,35 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						scroll-behavior: smooth;
 					}
 					:global(body) {
+						--border-accent-h: 232;
+						--border-accent-s: 96%;
+						--border-accent-l: 64%;
+						--border-accent: hsl(var(--border-accent-h), var(--border-accent-s), var(--border-accent-l));
+						--border-accent-1: hsl(calc(var(--border-accent-h) - 1), calc(var(--border-accent-s) * 1.01), calc(var(--border-accent-l) * 1.075));
+						--border-accent-2: hsl(calc(var(--border-accent-h) - 3), calc(var(--border-accent-s) * 1.02), calc(var(--border-accent-l) * 1.15));
+						--border-text-normal: hsl(var(--border-accent-h), 6%, 12%);
+						--border-text-muted: hsl(var(--border-accent-h), 9%, 36%);
+						--border-text-faint: hsl(var(--border-accent-h), 12%, 64%);
+						--border-bg-primary: #ffffff;
+						--border-bg-primary-alt: #fafafa;
+						--border-bg-secondary: hsl(var(--border-accent-h), calc(var(--border-accent-s) / 6), calc(100% - (100% - var(--border-accent-l)) / 16));
+						--border-bg-tertiary: hsl(var(--border-accent-h), calc(var(--border-accent-s) / 1.5), calc(100% - (100% - var(--border-accent-l)) / 10));
+						--border-modifier-border: hsla(var(--border-accent-h), calc(0.4 * var(--border-accent-s)), var(--border-accent-l), 0.2);
+						--border-modifier-hover: hsla(var(--border-accent-h), 6%, 64%, 0.15);
+						--border-pattern-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23000000' fill-opacity='0.12' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+						--border-radius-s: 6px;
+						--border-radius-m: 10px;
+						--border-red: rgb(221, 44, 56);
+						--border-green: rgb(29, 165, 29);
+						--border-orange: rgb(222, 116, 23);
+						--border-yellow: rgb(192, 156, 12);
+						--border-blue: rgb(23, 117, 217);
+						--border-cyan: rgb(22, 166, 171);
+						--border-purple: rgb(143, 71, 225);
+						--border-pink: rgb(221, 19, 153);
 						margin: 0;
-						background: #f6f8fb;
-						color: #1f2937;
+						background: var(--border-bg-tertiary);
+						color: var(--border-text-normal);
 					}
 					.reader-shell {
 						min-height: 100vh;
@@ -99,8 +125,8 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						justify-content: space-between;
 						height: 56px;
 						padding: 0 24px;
-						border-bottom: 1px solid #e5e7eb;
-						background: rgba(255, 255, 255, 0.86);
+						border-bottom: 1px solid var(--border-modifier-border);
+						background: rgba(255, 255, 255, 0.74);
 						backdrop-filter: blur(18px);
 					}
 					.breadcrumb {
@@ -108,16 +134,16 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						align-items: center;
 						gap: 10px;
 						min-width: 0;
-						color: #667085;
+						color: var(--border-text-faint);
 						font-size: 0.9rem;
 					}
 					.breadcrumb a {
-						color: #475467;
+						color: var(--border-text-muted);
 						text-decoration: none;
 					}
 					.breadcrumb-title {
 						overflow: hidden;
-						color: #111827;
+						color: var(--border-text-normal);
 						text-overflow: ellipsis;
 						white-space: nowrap;
 					}
@@ -126,12 +152,12 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						align-items: center;
 						height: 34px;
 						padding: 0 12px;
-						border: 1px solid #d9dee8;
+						border: 1px solid var(--border-modifier-border);
 						border-radius: 8px;
-						color: #344054;
+						color: var(--border-text-muted);
 						font-size: 0.85rem;
 						text-decoration: none;
-						background: #fff;
+						background: var(--border-bg-primary);
 					}
 					.reader-grid {
 						display: grid;
@@ -144,12 +170,12 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						height: calc(100vh - 57px);
 						overflow: auto;
 						padding: 34px 18px 28px 26px;
-						border-right: 1px solid #e5e7eb;
-						background: #f3f5f8;
+						border-right: 1px solid var(--border-modifier-border);
+						background: var(--border-bg-secondary);
 					}
 					.toc-label {
 						margin: 0 0 14px;
-						color: #98a2b3;
+						color: var(--border-text-faint);
 						font-size: 0.72rem;
 						font-weight: 700;
 						letter-spacing: 0.08em;
@@ -186,7 +212,7 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						display: none;
 					}
 					.primary-group summary:hover {
-						background: #fff;
+						background: var(--border-bg-primary);
 					}
 					.primary-marker {
 						display: inline-flex;
@@ -194,7 +220,7 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						justify-content: center;
 						width: 14px;
 						height: 14px;
-						color: #98a2b3;
+						color: var(--border-text-faint);
 						font-size: 0.72rem;
 						transition: transform 0.16s ease;
 					}
@@ -206,7 +232,7 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						overflow: hidden;
 						padding: 8px 10px;
 						border-radius: 8px;
-						color: #475467;
+						color: var(--border-text-muted);
 						font-size: 0.9rem;
 						line-height: 1.35;
 						text-decoration: none;
@@ -214,31 +240,31 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						white-space: nowrap;
 					}
 					.toc-list a:hover {
-						background: #fff;
-						color: #175cd3;
+						background: var(--border-modifier-hover);
+						color: var(--border-accent-1);
 					}
 					.primary-title {
 						min-width: 0;
 						flex: 1;
 						padding-left: 0;
-						color: #344054;
+						color: var(--border-text-normal);
 						font-weight: 650;
 					}
 					.child-toc-list {
 						margin: 2px 0 4px 22px;
 					}
 					.child-toc-list a {
-						color: #667085;
+						color: var(--border-text-muted);
 						font-size: 0.86rem;
 					}
 					.child-toc-list a.active {
-						background: #fff;
-						color: #175cd3;
+						background: var(--border-modifier-hover);
+						color: var(--border-accent-1);
 						font-weight: 650;
 					}
 					.empty-toc {
 						margin: 0;
-						color: #98a2b3;
+						color: var(--border-text-faint);
 						font-size: 0.86rem;
 						line-height: 1.6;
 					}
@@ -261,7 +287,7 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 					}
 					.secondary-toc .toc-list a {
 						padding: 7px 10px;
-						color: #667085;
+						color: var(--border-text-muted);
 						font-size: 0.84rem;
 					}
 					.secondary-toc .depth-4 a {
@@ -281,23 +307,25 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 					}
 					.date {
 						margin-bottom: 12px;
-						color: #667085;
+						color: var(--border-text-muted);
 						font-size: 0.92rem;
 					}
 					.post-header h1 {
-						margin: 0;
-						color: #20242c;
-						font-size: clamp(2.15rem, 4vw, 3.4rem);
-						line-height: 1.12;
+						margin: 0 0 0.75rem;
+						padding-bottom: 0.9rem;
+						border-bottom: 1px solid var(--border-modifier-border);
+						color: var(--border-text-normal);
+						font-size: clamp(2rem, 3.5vw, 3rem);
+						line-height: 1.2;
 						letter-spacing: 0;
 					}
 					.summary {
 						margin: 22px 0 0;
 						padding: 14px 16px;
-						border: 1px solid #d9dee8;
-						border-radius: 8px;
-						background: #fff;
-						color: #667085;
+						border: 1px solid var(--border-modifier-border);
+						border-radius: var(--border-radius-s);
+						background: var(--border-bg-primary);
+						color: var(--border-text-muted);
 						font-size: 0.96rem;
 						line-height: 1.7;
 					}
@@ -308,38 +336,71 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						display: block;
 						width: 100%;
 						height: auto;
-						border: 1px solid #e5e7eb;
-						border-radius: 10px;
+						border: 1px solid var(--border-modifier-border);
+						border-radius: var(--border-radius-m);
 					}
 					.prose {
-						color: #2f3440;
+						color: var(--border-text-normal);
 						font-size: 1rem;
-						line-height: 1.85;
+						line-height: 1.8;
 					}
 					.prose :global(h1),
 					.prose :global(h2),
 					.prose :global(h3),
 					.prose :global(h4) {
+						position: relative;
 						scroll-margin-top: 116px;
-						color: #20242c;
-						line-height: 1.3;
+						padding-left: 15px;
+						color: var(--border-text-normal);
 						letter-spacing: 0;
+					}
+					.prose :global(h1::before),
+					.prose :global(h2::before),
+					.prose :global(h3::before),
+					.prose :global(h4::before) {
+						position: absolute;
+						left: 0;
+						top: 0.25em;
+						width: 3px;
+						height: calc(1.2em - 8px);
+						border-radius: var(--border-radius-m);
+						content: '';
+					}
+					.prose :global(h1::before) {
+						background: var(--border-red);
+					}
+					.prose :global(h2::before) {
+						background: var(--border-orange);
+					}
+					.prose :global(h3::before) {
+						background: var(--border-yellow);
+					}
+					.prose :global(h4::before) {
+						background: var(--border-green);
 					}
 					.prose :global(h1) {
 						margin: 2.4rem 0 1rem;
-						font-size: 2rem;
+						font-size: 1.5em;
+						font-weight: 700;
+						line-height: 1.2;
 					}
 					.prose :global(h2) {
 						margin: 2.2rem 0 0.9rem;
-						font-size: 1.55rem;
+						font-size: 1.425em;
+						font-weight: 675;
+						line-height: 1.2;
 					}
 					.prose :global(h3) {
 						margin: 1.8rem 0 0.7rem;
-						font-size: 1.22rem;
+						font-size: 1.35em;
+						font-weight: 650;
+						line-height: 1.3;
 					}
 					.prose :global(h4) {
 						margin: 1.4rem 0 0.5rem;
-						font-size: 1.05rem;
+						font-size: 1.275em;
+						font-weight: 625;
+						line-height: 1.4;
 					}
 					.prose :global(p),
 					.prose :global(ul),
@@ -348,31 +409,45 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						margin: 0 0 1rem;
 					}
 					.prose :global(a) {
-						color: #175cd3;
+						color: var(--border-accent-1);
 						text-decoration-thickness: 1px;
 						text-underline-offset: 3px;
 					}
 					.prose :global(blockquote) {
-						padding: 12px 16px;
-						border-left: 3px solid #98a2b3;
-						border-radius: 0 8px 8px 0;
-						background: #f8fafc;
-						color: #475467;
+						position: relative;
+						padding: 8px 8px 8px 27px;
+						border: 0;
+						border-radius: var(--border-radius-s);
+						background: var(--border-pattern-light);
+						color: inherit;
+						font-style: normal;
+					}
+					.prose :global(blockquote::before) {
+						position: absolute;
+						top: 8px;
+						bottom: 8px;
+						left: 8px;
+						width: 3px;
+						border-radius: var(--border-radius-s);
+						background: var(--border-accent);
+						content: '';
 					}
 					.prose :global(pre) {
 						overflow-x: auto;
 						margin: 1.2rem 0;
 						padding: 16px;
-						border: 1px solid #d9dee8;
-						border-radius: 10px;
-						background: #111827;
-						color: #f8fafc;
+						border: 1px dashed var(--border-modifier-border);
+						border-radius: var(--border-radius-s);
+						background: var(--border-pattern-light);
+						color: var(--border-text-muted);
+						font-size: 0.88rem;
+						white-space: pre-wrap;
 					}
 					.prose :global(code) {
 						padding: 0.15rem 0.35rem;
-						border-radius: 5px;
-						background: #eef2f7;
-						color: #344054;
+						border-radius: 4px;
+						background: var(--border-pattern-light);
+						color: var(--border-pink);
 						font-size: 0.9em;
 					}
 					.prose :global(pre code) {
@@ -380,16 +455,26 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						background: transparent;
 						color: inherit;
 					}
+					.prose :global(strong) {
+						color: var(--border-red);
+						font-weight: 700;
+					}
+					.prose :global(em) {
+						color: var(--border-orange);
+					}
 					.prose :global(table) {
 						display: block;
 						width: 100%;
 						overflow-x: auto;
 						border-collapse: collapse;
 					}
+					.prose :global(thead tr) {
+						background: var(--border-pattern-light);
+					}
 					.prose :global(th),
 					.prose :global(td) {
 						padding: 10px 12px;
-						border: 1px solid #d9dee8;
+						border: 1px solid var(--border-modifier-border);
 					}
 					@media (max-width: 1040px) {
 						.reader-grid {
