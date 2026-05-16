@@ -88,7 +88,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 200,
+    "collapsed": true
   },
   "right": {
     "id": "bfa354ba62d181e6",
@@ -197,6 +198,7 @@
   },
   "active": "d1ac985cd18316d9",
   "lastOpenFiles": [
+    "wrangler.jsonc",
     "src/content/blog/OnCallAgent.md",
     "src/content/blog/system-sec.md",
     "src/content/blog/hack-agent.md",
