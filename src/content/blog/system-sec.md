@@ -1,5 +1,5 @@
 ---
-title: '"system-sec"'
+title: 系统安全 基线排查
 date: 2026-05-12
 summary: Linux and Windows的安全加固
 tags:

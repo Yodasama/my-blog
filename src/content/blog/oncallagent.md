@@ -1,5 +1,5 @@
 ---
-title: '"OnCallAgent"'
+title: OnCallAgent
 date: 2026-05-11
 summary: 小林Coding的Agent项目学习记录
 tags:
