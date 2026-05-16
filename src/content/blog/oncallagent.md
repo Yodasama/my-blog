@@ -762,4 +762,9 @@ class DashScopeEmbeddings(Embeddings):
 		self.model = model
 		self.dimensions = dimensions
 ```
-批量向量化文档(embed_documents) 和 单挑查询向量化(emv)
+批量向量化文档(embed_documents) 和 单挑查询向量化(embed_query)分别对应入库和检索场景
+```python
+def embed_documents(self,texts:List[Str]) -> List[float]:
+	"批量嵌入文档列表 返回向量列表"
+	response = self.client
+```
