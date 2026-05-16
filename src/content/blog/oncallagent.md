@@ -725,4 +725,11 @@ def split_markdown(self,content:str,file_path:str = "") -> List[Document]:
 	logger.info(f"Markdown分割完成：{file_path} -> {len(final_docs)} 个分片")
 	return final_docs
 ```
-合并小分片的
+合并小分片的逻辑 `_merge_small_chunks`：遍历所有分片，若当前分片小于min_size且合并后不超限，则将其追加到上一个分片中
+```python
+def _merge_small_chunks(self,documents:List[Document],min_size:int = 300) -> List[Document]:
+	merged_docs = []
+	current_doc = None
+	
+	for doc in docu
+```
