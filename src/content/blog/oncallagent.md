@@ -837,3 +837,7 @@ def delete_by_source(self,file_path:str) -> int:
 	logger.info(f"删除文件旧数据:{file_path},删除数量:{deleted_count}")
 	return deleted_count
 ```
+## 代码实现 - 召回 - Python
+流程：
+1. 将查询文本向量化
+2. 相似度查询
