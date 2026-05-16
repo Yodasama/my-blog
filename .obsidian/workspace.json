@@ -8,7 +8,7 @@
         "type": "tabs",
         "children": [
           {
-            "id": "dc8e85c125765ec0",
+            "id": "d1ac985cd18316d9",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -19,6 +19,16 @@
               },
               "icon": "lucide-file",
               "title": "OnCallAgent"
+            }
+          },
+          {
+            "id": "91cb5d77d833fba6",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "新标签页"
             }
           }
         ]
@@ -186,14 +196,14 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "dc8e85c125765ec0",
+  "active": "d1ac985cd18316d9",
   "lastOpenFiles": [
+    "src/content/blog/OnCallAgent.md",
     "src/content/blog/system-sec.md",
-    "src/content/blog/sec-tool.md",
     "templates/blog.md",
+    "src/content/blog/sec-tool.md",
     "src/content/blog/Sec.md",
     "src/content/blog/hack-agent.md",
-    "src/content/blog/OnCallAgent.md",
     "src/content/blog/hot-100.md",
     "src/content/blog/sec_tool.md",
     "src/content/blog/fedavg.md",
