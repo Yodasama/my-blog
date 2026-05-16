@@ -708,5 +708,10 @@ Markdown文档完整的三阶段分割逻辑
 def split_markdown(self,content:str,file_path:str = "") -> List[Document]:
 	"分割Markdown文档（两阶段分割 + 合并小片段）"
 	# 第一阶段 按标题分割
-	md_docs = self.markdown_splitter.split_documents()
+	md_docs = self.markdown_splitter.split_text(content)
+	
+	# 第二阶段 按大小进一步分割
+	docs_after_split = self.text_splitter.split——documents(md_docs)
+	
+	# 第三阶段 合并ta
 ```
