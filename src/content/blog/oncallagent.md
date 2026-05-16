@@ -806,3 +806,12 @@ self.vector_store = Milvus(
 	metadata_field = "metadata",
 )
 ```
+批量入库时，LangChain会自动调用embed_documents完成向量化，无需手动循环处理每个分片：
+```python
+def add_documents(self,documents:List[Document]) -> List[str]:
+	import time, uuid
+	start_time = time.time()
+	
+	# 为每个文档生成唯一UUID（auto_id = False时必须手动提供
+	ids = [str(uuid.uuid4())]
+```
