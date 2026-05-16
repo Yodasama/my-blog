@@ -719,5 +719,9 @@ def split_markdown(self,content:str,file_path:str = "") -> List[Document]:
 	# 添加文件路径元数据
 	for doc in final_docs:
 		doc.metadate["_source"] = file_path
-		doc.meta
+		doc.metadata["_extension"] = ".md"
+		doc.metadata["_file_name"] = Path(file_path).name
+		
+	logger.info(f"Markdown分割完成：{file_path} -> {len(final_docs)} 个分片")
+	return final_docs
 ```
