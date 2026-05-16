@@ -907,3 +907,8 @@ def embed_query(self,text:str) -> List[float]:
 	)
 	return response.data[0].embedding
 ```
+**构建搜索参数并执行向量检索**
+使用PyMilvus的collection.search进行相似度查询 获取距离最近的向量数据
+```python
+
+```
