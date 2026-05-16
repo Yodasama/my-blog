@@ -12,6 +12,14 @@ type Heading = {
 	slug: string;
 	text: string;
 };
+type SecondarySection = {
+	heading: Heading;
+	children: Heading[];
+};
+type PrimarySection = {
+	heading: Heading;
+	children: SecondarySection[];
+};
 
 const {
 	title,
@@ -31,8 +39,37 @@ const {
 };
 const metaDescription = summary ?? description ?? '';
 const displayDate = date ?? pubDate;
-const primaryHeadings = headings.filter((heading) => heading.depth <= 2);
-const secondaryHeadings = headings.filter((heading) => heading.depth >= 3 && heading.depth <= 4);
+const primarySections: PrimarySection[] = [];
+let currentPrimary: PrimarySection | undefined;
+let currentSecondary: SecondarySection | undefined;
+
+for (const heading of headings) {
+	if (heading.depth === 1) {
+		currentPrimary = { heading, children: [] };
+		currentSecondary = undefined;
+		primarySections.push(currentPrimary);
+		continue;
+	}
+
+	if (heading.depth === 2) {
+		if (!currentPrimary) {
+			currentPrimary = {
+				heading: { depth: 1, slug: title.toLowerCase().replaceAll(' ', '-'), text: title },
+				children: [],
+			};
+			primarySections.push(currentPrimary);
+		}
+		currentSecondary = { heading, children: [] };
+		currentPrimary.children.push(currentSecondary);
+		continue;
+	}
+
+	if ((heading.depth === 3 || heading.depth === 4) && currentSecondary) {
+		currentSecondary.children.push(heading);
+	}
+}
+
+const secondarySections = primarySections.flatMap((section) => section.children);
 ---
 
 {
@@ -125,6 +162,44 @@ const secondaryHeadings = headings.filter((heading) => heading.depth >= 3 && hea
 						padding: 0;
 						list-style: none;
 					}
+					.primary-list {
+						gap: 6px;
+					}
+					.primary-group {
+						min-width: 0;
+					}
+					.primary-group details {
+						border-radius: 10px;
+					}
+					.primary-group summary {
+						display: flex;
+						align-items: center;
+						gap: 6px;
+						min-height: 36px;
+						padding: 0 6px;
+						border-radius: 10px;
+						cursor: pointer;
+						list-style: none;
+					}
+					.primary-group summary::-webkit-details-marker {
+						display: none;
+					}
+					.primary-group summary:hover {
+						background: #fff;
+					}
+					.primary-marker {
+						display: inline-flex;
+						align-items: center;
+						justify-content: center;
+						width: 14px;
+						height: 14px;
+						color: #98a2b3;
+						font-size: 0.72rem;
+						transition: transform 0.16s ease;
+					}
+					.primary-group details[open] .primary-marker {
+						transform: rotate(90deg);
+					}
 					.toc-list a {
 						display: block;
 						overflow: hidden;
@@ -141,10 +216,24 @@ const secondaryHeadings = headings.filter((heading) => heading.depth >= 3 && hea
 						background: #fff;
 						color: #175cd3;
 					}
-					.toc-list .depth-2 a {
-						padding-left: 24px;
+					.primary-title {
+						min-width: 0;
+						flex: 1;
+						padding-left: 0;
+						color: #344054;
+						font-weight: 650;
+					}
+					.child-toc-list {
+						margin: 2px 0 4px 22px;
+					}
+					.child-toc-list a {
 						color: #667085;
 						font-size: 0.86rem;
+					}
+					.child-toc-list a.active {
+						background: #fff;
+						color: #175cd3;
+						font-weight: 650;
 					}
 					.empty-toc {
 						margin: 0;
@@ -177,6 +266,10 @@ const secondaryHeadings = headings.filter((heading) => heading.depth >= 3 && hea
 					.secondary-toc .depth-4 a {
 						padding-left: 22px;
 						font-size: 0.8rem;
+					}
+					.secondary-panel[hidden],
+					.secondary-placeholder[hidden] {
+						display: none;
 					}
 					.post-card {
 						min-width: 0;
@@ -350,11 +443,35 @@ const secondaryHeadings = headings.filter((heading) => heading.depth >= 3 && hea
 					<div class="reader-grid">
 						<aside class="primary-toc" aria-label="一级和二级目录">
 							<p class="toc-label">Contents</p>
-							{primaryHeadings.length > 0 ? (
-								<ol class="toc-list">
-									{primaryHeadings.map((heading) => (
-										<li class={`depth-${heading.depth}`}>
-											<a href={`#${heading.slug}`}>{heading.text}</a>
+							{primarySections.length > 0 ? (
+								<ol class="toc-list primary-list">
+									{primarySections.map((section) => (
+										<li class="primary-group">
+											<details>
+												<summary>
+													<span class="primary-marker" aria-hidden="true">
+														&gt;
+													</span>
+													<a class="primary-title" href={`#${section.heading.slug}`}>
+														{section.heading.text}
+													</a>
+												</summary>
+												{section.children.length > 0 && (
+													<ol class="toc-list child-toc-list">
+														{section.children.map((child) => (
+															<li>
+																<a
+																	class="secondary-selector"
+																	data-secondary-target={`section-${child.heading.slug}`}
+																	href={`#${child.heading.slug}`}
+																>
+																	{child.heading.text}
+																</a>
+															</li>
+														))}
+													</ol>
+												)}
+											</details>
 										</li>
 									))}
 								</ol>
@@ -365,14 +482,31 @@ const secondaryHeadings = headings.filter((heading) => heading.depth >= 3 && hea
 						<main class="reader-main">
 							<aside class="secondary-toc" aria-label="三级和四级目录">
 								<p class="toc-label">Sections</p>
-								{secondaryHeadings.length > 0 ? (
-									<ol class="toc-list">
-										{secondaryHeadings.map((heading) => (
-											<li class={`depth-${heading.depth}`}>
-												<a href={`#${heading.slug}`}>{heading.text}</a>
-											</li>
+								{secondarySections.length > 0 ? (
+									<>
+										<p class="empty-toc secondary-placeholder" data-secondary-empty>
+											选择左侧二级标题后显示对应的小节。
+										</p>
+										{secondarySections.map((section) => (
+											<div
+												class="secondary-panel"
+												data-secondary-panel={`section-${section.heading.slug}`}
+												hidden
+											>
+												{section.children.length > 0 ? (
+													<ol class="toc-list">
+														{section.children.map((heading) => (
+															<li class={`depth-${heading.depth}`}>
+																<a href={`#${heading.slug}`}>{heading.text}</a>
+															</li>
+														))}
+													</ol>
+												) : (
+													<p class="empty-toc">这个二级标题下暂无三四级标题。</p>
+												)}
+											</div>
 										))}
-									</ol>
+									</>
 								) : (
 									<p class="empty-toc">暂无三级或四级标题。</p>
 								)}

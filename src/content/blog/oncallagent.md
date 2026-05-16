@@ -757,6 +757,6 @@ class DashScopeEmbeddings(Embeddings):
 	def __init__(self,api_key:str,model:str = "text-embedding-v4"),
 		self.client = OpenAI(
 			api_key = api_key
-			base_url = ""
+			base_url = "https://dashcope.aliyuncs.com/compatible-mode/v1"
 		)
 ```
