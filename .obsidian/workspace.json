@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "src/content/blog/hot-100.md",
+                "file": "src/content/blog/system-sec.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "hot-100"
+              "title": "system-sec"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "src/content/blog/hot-100.md",
+                "file": "src/content/blog/system-sec.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "hot-100 的反向链接列表"
+              "title": "system-sec 的反向链接列表"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "src/content/blog/hot-100.md",
+                "file": "src/content/blog/system-sec.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "hot-100 的大纲"
+              "title": "system-sec 的大纲"
             }
           }
         ],
@@ -187,12 +187,12 @@
   },
   "active": "d1ac985cd18316d9",
   "lastOpenFiles": [
+    "src/content/blog/Sec.md",
+    "src/content/blog/sec-tool.md",
+    "src/content/blog/OnCallAgent.md",
     "src/content/blog/hot-100.md",
     "src/content/blog/system-sec.md",
-    "src/content/blog/sec-tool.md",
-    "src/content/blog/Sec.md",
     "src/content/blog/hack-agent.md",
-    "src/content/blog/OnCallAgent.md",
     "dist/client/sitemap-index.xml",
     "dist/client/sitemap-0.xml",
     "dist/client/_astro/projects.HUUki4zP.css",

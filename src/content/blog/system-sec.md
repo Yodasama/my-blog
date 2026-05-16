@@ -18,9 +18,9 @@ draft: false
    1. Linux：auth.log ; secure ; messages
    2. Windows：4624 ; 4625 ; 7045
 
-### 基线加固
+## 基线加固
 
-#### 账户与密码策略
+### 账户与密码策略
 
 ```bash
 cat /etc/passwd
@@ -45,7 +45,7 @@ cat /etc/pam.d/system-auth
 - 密码周期轮换
 - 登录失败锁定
 
-#### SSH安全加固
+### SSH安全加固
 
 ```bash
 /etc/ssh/sshd_config
@@ -62,7 +62,7 @@ Port 22
 
 重启：`systemctl restart sshd`
 
-#### 文件权限检查
+### 文件权限检查
 
 /etc	/tmp	/var/tmp	/root
 
@@ -70,7 +70,7 @@ Port 22
 
 检查 world writable：`find / -perm -2 -type f`
 
-#### 服务与端口最小化
+### 服务与端口最小化
 
 查看端口：
 
@@ -84,7 +84,7 @@ systemctl list-unit-files
 systemctl disable telnet
 ```
 
-#### 防火墙与SELinux
+### 防火墙与SELinux
 
 ```bash
 # 防火墙
@@ -95,7 +95,7 @@ iptables -L
 getenforce
 ```
 
-#### 定时任务检查
+### 定时任务检查
 
 ```bash
 # 系统
@@ -106,9 +106,9 @@ ls /etc/cron.*
 crontab -l
 ```
 
-### Linux安全排查
+## Linux安全排查
 
-#### 登录行为排查
+### 登录行为排查
 
 ```bash
 # 当前登录
@@ -142,7 +142,7 @@ tail -f /var/log/secure
 grep "Accepted" /var/log/secure
 ```
 
-#### 进程排查
+### 进程排查
 
 ```bash
 # 查看异常进程
@@ -156,7 +156,7 @@ pstree
 ls -l /proc/PID/exe
 ```
 
-#### 网络连接排查
+### 网络连接排查
 
 ```bash
 netstat -antp
@@ -167,7 +167,7 @@ ss -antp
 - 可疑 ESTABLISHED
 - 异常监听端口
 
-#### Webshell / 恶意文件排查
+### Webshell / 恶意文件排查
 
 ```bash 
 # 最近修改文件
@@ -178,9 +178,9 @@ grep -R "eval(base64_decode" /var/www/html
 
 # Windows基线加固与排查
 
-### 基线加固
+## 基线加固
 
-#### 账户安全
+### 账户安全
 
 ```cmd
 # 查看用户
@@ -194,7 +194,7 @@ net localgroup administrators
 - 重命名 Administrator
 - 删除无用账户
 
-#### 密码策略
+### 密码策略
 
 ```cmd
 # 查看
@@ -214,7 +214,7 @@ gpedit.msc
 # → 账户策略
 ```
 
-#### 关闭危险服务
+### 关闭危险服务
 
 ```bash
 # 查看服务
@@ -226,7 +226,7 @@ services.msc
 # Remote Registry
 ```
 
-#### 防火墙
+### 防火墙
 
 ```bash
 # 查看
