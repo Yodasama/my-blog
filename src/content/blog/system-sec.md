@@ -235,7 +235,7 @@ wf.msc
 netsh advfirewall show allprofiles
 ```
 
-#### RDP 加固
+### RDP 加固
 
 重点：
 
@@ -244,9 +244,9 @@ netsh advfirewall show allprofiles
 - 开启 NLA
 - 禁止弱口令
 
-### Windows安全排查
+## Windows安全排查
 
-#### 登录日志查看
+### 登录日志查看
 
 ```bash
 # 事件查看器
@@ -255,7 +255,7 @@ eventvwr.msc
 # Windows日志 -> 安全
 ```
 
-#### 常见登录事件ID
+### 常见登录事件ID
 
 ```bash
 Event ID 4624 # 登录成功
@@ -268,7 +268,7 @@ Event ID 4726 # 删除用户
 Event ID 7045 # 创建服务 
 ```
 
-#### Windows日志位置
+### Windows日志位置
 
 安全日志：C:\Windows\System32\winevt\Logs\Security.evtx
 
@@ -276,7 +276,7 @@ Event ID 7045 # 创建服务
 
 应用日志：Application.evtx
 
-#### Powershell排查
+### Powershell排查
 
 ```powershell
 # 查看历史
@@ -296,7 +296,7 @@ Get-history
 
 4104 经常记录恶意脚本。
 
-#### 网络连接排查
+### 网络连接排查
 
 netstat -ano
 

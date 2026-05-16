@@ -828,5 +828,10 @@ def add_documents(self,documents:List[Document]) -> List[str]:
 在重新索引同一个文件前，会先按_source路径删除旧数据
 ```python
 def delete_by_source(self,file_path:str) -> int:
-
+	"删除指定文件的所有文档"
+	collection = milvus_manager.get_collection()
+	# metadata是Json字段 使用Json路径查询语法
+	expr = f'metadata["_source"] == "{file_path}"'
+	result = collection.delete(expr)
+	deleted_count  
 ```
