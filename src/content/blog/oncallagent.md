@@ -743,4 +743,11 @@ def _merge_small_chunks(self,documents:List[Document],min_size:int = 300) -> Lis
 			# 保存当前文档，开始新文档
 			merged_docs.append(current_doc)
 			current_doc = doc
+			
+		if current_doc is not None:
+			merged_docs.append(current_doc)
+			
+		return merged_docs
 ```
+**文件索引** - 向量化和存储到数据库
+Embedding生成
