@@ -698,6 +698,8 @@ def DocumentSplitterService:
 	# 第二阶段：递归字符分割器（用于二次分割）
 	self.text_splitter = RecursiveCharacterTextSplitter(
 		chunk_size = self.chunk_size \* 2,
-		
+		chunk_overlap = self.chunk_overlap,
+		length_funtion = len,
+		is_separator_regex = False,
 	)
 ```
