@@ -891,3 +891,8 @@ def search_similar_documents(self, query:str, top_k:int = 3) -> List[SearchResul
 	logger.info(f"搜索完成 找到len(search_results)个相似文档")
 	return search_results
 ```
+**查询文本向量化**
+首先对用户问题进行向量化，调用`DashScopeEmbeddings.embed_query`，通过DashScope OpenAI兼容接口获取1024维向量：
+```python
+
+```
