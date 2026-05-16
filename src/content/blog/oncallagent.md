@@ -855,5 +855,15 @@ def search_similar_documents(self, query:str, top_k:int = 3) -> List[SearchResul
 	"""
 	logger.info(f"搜索相似文档，查询:{query},topK:{top_k}")
 	
-	# 1.
+	# 1.查询文本向量化
+	query_vector = vector_embedding_service.embed_query(query)
+	logger.debug(f"查询向量生成成功,纬度:{len(query_vector)}")
+	
+	# 2.获取collection
+	collection:Collection = milvus_manager.get_collection()
+	
+	# 3.构建搜索参数
+	search_params = {
+		"metric_type":"L2"
+	}
 ```

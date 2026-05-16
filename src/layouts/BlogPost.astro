@@ -78,11 +78,11 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 			<head>
 				<BaseHead title={title} description={metaDescription} />
 				<style>
-					:global(html) {
+					html {
 						scroll-padding-top: 128px;
 						scroll-behavior: smooth;
 					}
-					:global(body) {
+					body {
 						--border-accent-h: 232;
 						--border-accent-s: 96%;
 						--border-accent-l: 64%;
@@ -344,20 +344,20 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						font-size: 1rem;
 						line-height: 1.8;
 					}
-					.prose :global(h1),
-					.prose :global(h2),
-					.prose :global(h3),
-					.prose :global(h4) {
+					.prose h1,
+					.prose h2,
+					.prose h3,
+					.prose h4 {
 						position: relative;
 						scroll-margin-top: 116px;
 						padding-left: 15px;
 						color: var(--border-text-normal);
 						letter-spacing: 0;
 					}
-					.prose :global(h1::before),
-					.prose :global(h2::before),
-					.prose :global(h3::before),
-					.prose :global(h4::before) {
+					.prose h1::before,
+					.prose h2::before,
+					.prose h3::before,
+					.prose h4::before {
 						position: absolute;
 						left: 0;
 						top: 0.25em;
@@ -366,54 +366,54 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						border-radius: var(--border-radius-m);
 						content: '';
 					}
-					.prose :global(h1::before) {
+					.prose h1::before {
 						background: var(--border-red);
 					}
-					.prose :global(h2::before) {
+					.prose h2::before {
 						background: var(--border-orange);
 					}
-					.prose :global(h3::before) {
+					.prose h3::before {
 						background: var(--border-yellow);
 					}
-					.prose :global(h4::before) {
+					.prose h4::before {
 						background: var(--border-green);
 					}
-					.prose :global(h1) {
+					.prose h1 {
 						margin: 2.4rem 0 1rem;
 						font-size: 1.5em;
 						font-weight: 700;
 						line-height: 1.2;
 					}
-					.prose :global(h2) {
+					.prose h2 {
 						margin: 2.2rem 0 0.9rem;
 						font-size: 1.425em;
 						font-weight: 675;
 						line-height: 1.2;
 					}
-					.prose :global(h3) {
+					.prose h3 {
 						margin: 1.8rem 0 0.7rem;
 						font-size: 1.35em;
 						font-weight: 650;
 						line-height: 1.3;
 					}
-					.prose :global(h4) {
+					.prose h4 {
 						margin: 1.4rem 0 0.5rem;
 						font-size: 1.275em;
 						font-weight: 625;
 						line-height: 1.4;
 					}
-					.prose :global(p),
-					.prose :global(ul),
-					.prose :global(ol),
-					.prose :global(blockquote) {
+					.prose p,
+					.prose ul,
+					.prose ol,
+					.prose blockquote {
 						margin: 0 0 1rem;
 					}
-					.prose :global(a) {
+					.prose a {
 						color: var(--border-accent-1);
 						text-decoration-thickness: 1px;
 						text-underline-offset: 3px;
 					}
-					.prose :global(blockquote) {
+					.prose blockquote {
 						position: relative;
 						padding: 8px 8px 8px 27px;
 						border: 0;
@@ -422,7 +422,7 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						color: inherit;
 						font-style: normal;
 					}
-					.prose :global(blockquote::before) {
+					.prose blockquote::before {
 						position: absolute;
 						top: 8px;
 						bottom: 8px;
@@ -432,7 +432,7 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						background: var(--border-accent);
 						content: '';
 					}
-					.prose :global(pre) {
+					.prose pre {
 						overflow-x: auto;
 						margin: 1.2rem 0;
 						padding: 16px;
@@ -443,36 +443,36 @@ const secondarySections = primarySections.flatMap((section) => section.children)
 						font-size: 0.88rem;
 						white-space: pre-wrap;
 					}
-					.prose :global(code) {
+					.prose code {
 						padding: 0.15rem 0.35rem;
 						border-radius: 4px;
 						background: var(--border-pattern-light);
 						color: var(--border-pink);
 						font-size: 0.9em;
 					}
-					.prose :global(pre code) {
+					.prose pre code {
 						padding: 0;
 						background: transparent;
 						color: inherit;
 					}
-					.prose :global(strong) {
+					.prose strong {
 						color: var(--border-red);
 						font-weight: 700;
 					}
-					.prose :global(em) {
+					.prose em {
 						color: var(--border-orange);
 					}
-					.prose :global(table) {
+					.prose table {
 						display: block;
 						width: 100%;
 						overflow-x: auto;
 						border-collapse: collapse;
 					}
-					.prose :global(thead tr) {
+					.prose thead tr {
 						background: var(--border-pattern-light);
 					}
-					.prose :global(th),
-					.prose :global(td) {
+					.prose th,
+					.prose td {
 						padding: 10px 12px;
 						border: 1px solid var(--border-modifier-border);
 					}
