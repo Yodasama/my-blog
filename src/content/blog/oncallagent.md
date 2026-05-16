@@ -877,5 +877,17 @@ def search_similar_documents(self, query:str, top_k:int = 3) -> List[SearchResul
 		output_fields = ["id","content","meradata"],
 	)
 	
-	# t.
+	# 5.解析搜索结果
+	search_results = []
+	for hits in results:
+		for hit in hits:
+			result = SearchResult(
+				id = hit.entity.get("id"),
+				content = hit.entity.get("content"),
+				score = hit.distance,
+				metadata = hit.entity.get("metadata",{}),
+				search_results.append(result)
+			)
+	logger.info(f"搜索完成 找到len(search_results)个相似文档")
+	return search_
 ```
