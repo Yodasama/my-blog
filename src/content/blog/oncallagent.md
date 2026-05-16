@@ -928,5 +928,11 @@ results = collection.search(
 ```
 搜索结果封装到SearchResult对象中，score为L2欧氏距离，越小表示越相似
 ```python
-class SeaerchResult
+class SeaerchResult:
+	def __init__(self,id:str,content:str,score:float,metadata:Dict[str,Any]):
+		self.id = id
+		self.content = content
+		self.score = score
+		self.metadata = metadata
 ```
+# 对话Agent
