@@ -889,5 +889,5 @@ def search_similar_documents(self, query:str, top_k:int = 3) -> List[SearchResul
 				search_results.append(result)
 			)
 	logger.info(f"搜索完成 找到len(search_results)个相似文档")
-	return search_
+	return search_results
 ```
