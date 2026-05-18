@@ -1028,3 +1028,191 @@ Function Call：
 
 5. 大模型不再返回 tool_calls -> 循环结束 输出最终答案
 ```
+### ReAct的好处
+1. AI具备了使用工具的能力
+2. AI的回答更准确、更可靠
+3. 解题过程透明可追踪
+4. 具备了处理复杂多步骤任务的能力
+5. AI Agent的基石
+## 对话Agent的核心流程解析
+### 从RAG召回到ReAct多轮交互
+对话Agent的核心目标是结合外部知识 RAG召回 与 工具调用能力(ReAct模式)，解决复杂问题
+流程如下：
+1. 用户输入 -> Embedding -> 向量数据库召回
+2. 构建带上下文(召回内容)的Prompt
+3. ReAct模式多轮交互
+4. 最终输出答案![[对话Agent工作流程.png]] 
+#### RAG召回：学习外部知识
+目标：从向量数据库中获取与用户问题相关的上下文信息
+步骤：
+1. 用户输入经InputToRag Lambda Node处理，生成用于召回的字符串
+2. 调用Retriever组建，通过用户召回的字符串
+3. 向量数据库执行相似度匹配，返回相关文档
+4. 结果存入`map["documents"]`，作为后续Prompt的上下文来源
+#### Prompt构建：动态拼接上下文与对话历史
+目标：将用户输入、RAG召回内容、对话历史 整合成大模型可理解的Prompt
+构建好之后 将Prompt移交给ReAct组件使用
+核心组件：`ChatTemplate`
+```python
+输入：两个lambda node的输出合并
+
+SystemPrompt:"xxx"
+UserPrompt:"xxx"
+```
+占位符设计：
+{content}:用户原始问题
+{documents}:RAG召回的相关文档
+{date}:当前时间（增强时效性）
+{history}:历史对话
+#### ReAct模式：让Agent学会"思考-行动-观察"循环
+目标：通过多轮工具调用解决复杂问题，核心是"显示思考 - 工具调用 - 结果观察"
+具体流程可参考上文中：[[#现代ReAct怎么实现]]
+#### 关键组件分析
+Lambda Node:数据流转的“转换器”
+`InputToRag`:
+	输入：用户原始问题（可自定义预处理，过滤无关信息
+	输出：用于RAG召回的字符串（直接影响召回精度，需确保与向量数据库存储内容匹配
+`InputToChat`：
+	输入：用户问题+对话历史
+	输出：map结构（含content / history 等key），作为ChatTemplate的动态参数来源
+
+Retriever:向量召回的“连接器”
+以Milvus实现为例，`Retrieve`方法核心逻辑
+```go
+func (r *MilvusRetriever) Retriece(ctx context.Context, input string)([]*schema.Document,error){
+	// 1.问题向量化
+	embedding,_ := r.embedding.Embed(ctx,input)
+	// 2.向量数据库查询（TopK相似度匹配）
+	results,_ := r.client.Search(ctx, embedding, 5) // top5
+	// 3.格式转换为schema.Document
+	return convertToDocuments(results),nil
+}
+```
+Tool:Agent的“双手”
+	本质是带描述的函数，需要明确告知大模型：
+- 函数名称（如“查询当前时间”）
+- 入参/返参格式（JSON描述）
+- 使用场景（如”当问题涉及到当前时间时调用“）
+## 对话Agent代码实现-Python
+### 消息召回
+召回通过`retrieve_knowledge`工具实现，Agent在推理是会自动判断是否需要调用工具检索知识库。工具内部通过VectorStoreMananger.similarity_search完成向量检索。
+可见上文:[[#代码实现 - 召回 - Python]]
+```python
+# retrieve_knowledge 工具挂载到Agent上
+self.tools = [retrieve_knowledge,get_current_time]
+```
+### 构建Prompt
+系统提示词在`_build_system_prompt`中构建，描述Agent的角色定位和行为准则。
+与工具列表无关 - LangChain框架会自动将工具信息传递给大模型，prompt中无需手动列举：
+```python
+def _build_system_prompt(self) -> str:
+	from textwrap import dedent
+	return dedent("""
+		你是一个专业的AI助手，能够使用多种工具来帮助用户解决问题。
+		
+		工作原则:
+		1.理解用户需求，选择合适的工具来完成任务
+		2.当需要获取实时信息或专业知识时，主动使用相关工具
+		3.基于工具返回的结果提供准确、专业的回答
+        4.如果工具无法提供足够信息，请诚实地告知用户
+		
+		回答要求:
+		- 保持友好、专业的语气
+		- 回答简洁明了，重点突出
+		- 基于事实，不编造信息
+		- 如有不确定的地方，明确说明
+		
+		请根据用户的问题，灵活使用可用工具，提供高质量的帮助。
+		""").strip()
+```
+会话历史由LangGraph的`MemorySaver` checkpointer自动管理，每次调用时传入相同的`thread_id` (即`session_id`)即可自动携带上下文，无需手动拼接历史消息到prompt
+### 创建ReAct Agent
+使用LangChain的`create_agent`创建Agent，绑定ChatQwen模型、工具列表和`MemorySaver`检查点。MCP工具（腾讯云CLS日志、监控告警等）在首次请求时异步加载，与本地工具合并后一起绑定：
+```python
+class RagAgentService:
+	def __init__(self,streaming:bool = True):
+		self.model = ChatQwen(
+			model = config.rag_model,
+			api_key = config.dashscope_api_key,
+			temperature = 0.7,
+			streaming = streaming,
+		)
+		
+		# 本地工具：RAG知识检索 + 时间查询
+		self.tools = [retrieve_knowledge,get_current_time]
+		
+		# 会话持久化(基于内存的 checkpointer)
+		self.checkpointer = MemorySaver()
+		
+		self.agent = None # 延迟初始化（等待MCP工具加载完成）
+	
+	async def _initialized_agent(self):
+		"异步初始化 Agent（包括MCP工具）"
+		if self._agent_initialized:
+			return
+		
+		# 加载MCP工具（CLS日志服务 + 监控告警）
+		mcp_client = await get_mcp_client_with_retry()
+		mcp_tools = await mcp_client.get_tools()
+		
+		# 合并所有工具
+		all_tools = self.tools + mcp_tools
+		
+		self.agent = create_agent(
+			self.model,
+			tools = all_tools,
+			checkpointer = self.checkpointer,
+		)
+		self._agent_initialized = True
+```
+### 执行ReAct Agent
+#### 非流式调用
+调用`agent.ainvoke`，等待Agent完成全部推理和工具调用后一次性返回结果
+```python
+async def query(self, question: str,session_id: str) -> str:
+	await self._initialized_agent()
+	
+	messages = [
+		SystemMessage(content = self.system_prompt),
+		HumanMessage(content = question)
+	]
+	
+	result = await self.agent.ainvoke(
+		input = {"messages":messages},
+		config = {"configurable":{"thread_id":session_id}},
+	)
+	# 取最后一条消息为最终答案
+	last_message = result["messages"][-1]
+	return last_message.content
+```
+#### 流式调用
+调用`agent.astream`，使用`stream_mode="messages"`逐token输出，配合F啊身体API的SSE接口实时推送给前端：
+```python
+async def query_stream(self,question:str, session_id:str) -> AsyncGenerator:
+	await self._initialized_agent()
+	
+	messages = [
+		SystemMessage(content = self.system_prompt),
+		HumanMessage(content = question)
+	]
+	
+	async for token,metadata in self.agent.astream(
+		input = {"messages":messages},
+		config = {"configurable":{"thread_id":session_id}},
+		stream_mode = "messages",
+	):
+		if type(token).__name__ in ("AIMessage","AIMessageChunk"):
+			content_blocks = getattr(token, 'content_blocks', None)
+			if content_blocks:
+				for block in content_blocks:
+					if isinstance(block,dict) and block.get('type') == 'text':
+						text = block.get('text','')
+						if text:
+							yield {"type":"content", "data":text}
+	yield {"type":"complete"}
+```
+#### SSE接口层
+
+```python
+
+```

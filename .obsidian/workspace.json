@@ -8,8 +8,9 @@
         "type": "tabs",
         "children": [
           {
-            "id": "d1ac985cd18316d9",
+            "id": "2e8870e33fa56243",
             "type": "leaf",
+            "pinned": true,
             "state": {
               "type": "markdown",
               "state": {
@@ -17,12 +18,13 @@
                 "mode": "source",
                 "source": false
               },
+              "pinned": true,
               "icon": "lucide-file",
               "title": "OnCallAgent"
             }
           },
           {
-            "id": "2e8870e33fa56243",
+            "id": "e656d7fabfe63214",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -197,8 +199,16 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "d1ac985cd18316d9",
+  "active": "2e8870e33fa56243",
   "lastOpenFiles": [
+    "public/images/posts/OnCallAgent/对话Agent工作流程.png",
+    "public/对话Agent工作流程.png",
+    "public/截屏2026-05-18 10.42.47.png",
+    "src/content/blog/OnCallAgent.md",
+    "public/images/posts/OnCallAgent",
+    "public/images/posts/未命名.md",
+    "public/images/posts",
+    "截屏2026-05-18 10.42.47.png",
     "dist/client/sitemap-index.xml",
     "dist/client/sitemap-0.xml",
     "dist/client/_astro/blog-placeholder-about.BtEdEmGp.jpg",
@@ -209,13 +219,9 @@
     "dist/client/index.html",
     "dist/client/rss.xml",
     "dist/client/projects/index.html",
-    "dist/client/projects",
-    "dist/client/blog/system-sec/index.html",
-    "dist/client/blog/system-sec",
     "dist/client/images/panda.JPG",
     "dist/client/images/background.jpg",
     "dist/client/favicon.svg",
-    "src/content/blog/OnCallAgent.md",
     "src/content/blog/hack-agent.md",
     "src/content/blog/hot-100.md",
     "src/content/blog/Sec.md",
@@ -240,10 +246,6 @@
     "node_modules/undici/README.md",
     "node_modules/undici/docs/docs/api/api-lifecycle.md",
     "node_modules/undici/docs/docs/api/WebSocket.md",
-    "node_modules/undici/docs/docs/api/Util.md",
-    "dist/_astro/blog-placeholder-about.BtEdEmGp_2eecaz.webp",
-    "dist/_astro/blog-placeholder-1.Bx0Zcyzv.jpg",
-    "dist/_astro/blog-placeholder-about.BtEdEmGp.jpg",
-    "dist/images/panda.JPG"
+    "dist/_astro/blog-placeholder-about.BtEdEmGp_2eecaz.webp"
   ]
 }
