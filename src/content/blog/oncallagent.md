@@ -936,4 +936,95 @@ class SeaerchResult:
 		self.metadata = metadata
 ```
 # 对话Agent
-## 前置准备
+## 前置准备：对话的需求 场景 价值分析
+需求：解决重复咨询耗费人力，响应慢，经验流失等痛点
+
+对话Agent：核心逻辑通用，可以用于多个相似场景
+1. 业务方支持
+2. 值班自救
+3. 工单预处理
+
+对话Agent背后的核心技术
+1. RAG
+2. Prompt
+3. 多轮对话 记住上下文
+4. 流式输出：SSE技术
+SSE(Server-Sent Events) 服务器推送事件，服务器算一点就推送一点，前端实时显示。
+5. 容错处理：避免产生AI幻觉
+## 架构设计：ReAct设计模式
+### 什么是ReAct
+ReAct = Reasoning / 推理 + Acting / 行动
+
+例如：问Ai “地球和火星的质量加起来等于多少”
+	Ai不会做精确计算，本质上是预测下文
+人面临这个问题的思维：
+1. 想：地球质量是多少，火星质量是多少
+2. 查：打开搜索引擎，查找相关数据
+3. 算：两个数据加在一起
+4. 答：地球的质量+火星的质量是xxx
+ReAct就是让Ai模拟人的过程：思考 -> 行动 -> 观察 -> 再思考 -> ··· -> 输出
+### 最早的ReAct是怎么实现的
+依靠Prompt + 字符串解析
+1. 用Prompt告诉Ai该怎么输出
+在System Prompt中严格规定Ai的输出格式，让他必须按照Thought -> Action -> Pause的模式进行回复
+```shell
+工作流程：
+1. Thought:描述你的推理过程
+2. Action:执行一个动作（调用工具等）
+3. Pause:停下来 等待工具返回结果
+4. Observation:分析工具返回的结果
+   
+可用工具：
+- calculation:数学计算
+- planet_mass:查询行星质量
+```
+2. 代码解析Ai的输出 调用相应工具
+```shell
+1. Thought: 我需要地球和火星的质量，先查地球
+2. Action: planet_mass:Earth
+3. Pause
+   
+Observation: Earth has a mass of xxx kg
+```
+用正则表达式解析文本，把Action: planet_mass:Earth拆出来，知道要调用planet_mass这个函数，参数是Earth。然后把结果包装成Observation返回给AI。
+AI继续思考、行动、循环 直到不再输出Action，直接给出Answer 结束
+#### 伪代码表示流程
+```python
+def query(question):
+	messages = [system_prompt,question] #初始化对话
+	
+	for i in range(max_turns): # 最多循环N轮
+		result = call_llm(messages) # Prompt发给AI
+		
+		if "Action:" in result: # Ai 输出里有Action？
+			tool,input = parse(result) # 有 -> 正则解析出工具名和参数
+			observation = run_tool(tool,input) # 执行工具，拿到结果
+			messages.append(f"Observation:{Observation}") # 结果返回AI
+		else:
+				return result # 没有Action 输出最终结果
+```
+#### 存在的问题
+1. 格式脆弱：完全依靠正则匹配字符串，不按格式输出就不能匹配
+2. 复杂参数搞不定：工具的输入是潜逃的JSON对象，用字符串很难进行描述和解析
+3. 手动进行错误处理：输出了不存在的工具名，格式错误
+4. 开发成本高：每个项目都要设计格式，写解析逻辑，处理边界情况
+### 现代ReAct怎么实现
+把古法ReAct进行标准化，用JSON进行统一的工具定义和调用格式
+Function Call：
+1. 工具描述：用标准的JSON格式定义工具的名字 功能
+2. AI怎么调用：返回结构化的JSON，不输出自然语言字符串
+3. 结果怎么回传：按照规定的格式传回给AI
+#### 现代ReAct的执行流程
+```shell
+1. 把工具的JSON描述 + 用户问题 一起发给大模型
+   
+2. 大模型自己判断要不要调用工具
+	- 需要 -> 返回标准JSON格式的tool_calls
+	- 不需要 -> 直接返回文本答案
+
+3. 解析JSON，执行对应的工具函数，拿到结果
+
+4. 把工具结果按规定格式加到对话里 开始下一轮循环
+
+5. 大模型不再返回 tool_calls -> 循环结束 输出最终答案
+```
