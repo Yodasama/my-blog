@@ -1741,3 +1741,34 @@ async def executor(state: PlanExecuteState) -> Dict[str, Any]:
 	}
 ```
 #### Replanner节点
+Replanner根据原始任务、已执行步骤和剩余计划做出三选一的决策：
+
+| 决策       | 含义            | 触发条件                |
+| -------- | ------------- | ------------------- |
+| respond  | 信息充足，立即生成最终报告 | 最高优先级，已执行>=3步且有关键信息 |
+| continue | 当前计划合理，继续执行   | 剩余步骤确实必要            |
+| replan   | 调整计划，替换剩余步骤   | 最低优先级，计划有重大偏差才使用    |
+决策同样用Pydantic模型约束输出：
+```python
+class Act(BaseModel):
+	action:str = Field(description = "下一步行动：'continue' | 'replan' | 'respond'")
+	new_steps: List[str] = Field(default_factory=list,description = "replan时的新步骤列表")
+```
+Replanner核心逻辑（含安全限制）：
+```python
+async def replanner(state: PlanExecuteState) -> Dict[str,Any]:
+	past_steps = state.get("past_steps",[])
+	plan = state.get("plan",[])
+	
+	# 安全限制：已执行步骤超过8步，强制生成响应，防止无限循环
+	if len(past_steps) >= 8:
+		return await _generate_response(state,llm)
+		
+	if plan:
+		#还有剩余步骤 让LLM做决策
+		act = await replanner_chain.ainvoke({
+			"messages":[
+				("user",f"原始任务：{input_text}"),
+			]
+		})
+```
