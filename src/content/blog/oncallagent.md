@@ -1696,11 +1696,48 @@ planner_prompt = ChatPromptTemplate.from_messages([
 		{experience_context}
 		
 		对于给定的任务，创建一个简单的、逐步的计划：
-		-
-		-
-		-
-		-
+		- 将任务分解为逻辑上独立的步骤
+		- 每个步骤明确使用哪些工具，最好能同时提供工具所需参数
+		- 步骤之间应有清晰的依赖关系
+		- 如果有相关经验文档，请参考其中的方法和步骤制定计划
 	"""),
 	("placeholder","{messages}"),
 ])
 ```
+#### Executor节点
+Executor每次执行计划的第一个步骤，使用LangGraph的ToolNode自动处理工具调用，执行完后将该步骤从plan中移除，并将执行结果追加到past_steps:
+```python
+async def executor(state: PlanExecuteState) -> Dict[str, Any]:
+	plan = state.get("plan",[])
+	task = plan[0] # 只取第一个步骤
+	
+	# 绑定工具的LLM
+	all_tools = local_tools + mcp_tools
+	llm_with_tools = llm.bind_tools(all_tools)
+	tool_node = ToolNode(all_tools)
+
+	messages = [
+		SystemMessage(content = "你是一个能力强大的助手，负责执行具体的任务步骤···"),
+			HumanMessage(content = f"请执行以下任务：{task}")
+	]
+	
+	# 第一步：LLM决定是否需要工具调用
+	llm_response = await llm_with_tools.ainvoke(messages)
+	
+	# 第二步：如果有工具调用，使用ToolNode自动执行
+	if hasattr(llm_response, "tool_calls") and llm_response.tool_calls:
+		messages.append(llm_response)
+		tool_messages = await tool_node.ainvoke({"messages":messages})
+		messages.extend(tool_messages["messages"])
+		# 第三步：将工具结果返回给LLM生成最终答案
+		final_response = await llm_with_tools.ainvoke(messages)
+		result = final_response.content
+	else:
+		result = llm_response.content
+		
+	return {
+		"plan": plan[1:], # 移除执行的第一个步骤
+		"past_steps": [(task,result)], # 追加执行历史
+	}
+```
+#### Replanner节点
