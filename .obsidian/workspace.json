@@ -201,10 +201,12 @@
   },
   "active": "2e8870e33fa56243",
   "lastOpenFiles": [
+    "public/images/posts/OnCallAgent/运维Agent工作流程.png",
+    "src/content/blog/OnCallAgent.md",
+    "public/images/posts/OnCallAgent/截屏2026-05-18 17.43.36.png",
     "public/images/posts/OnCallAgent/对话Agent工作流程.png",
     "public/对话Agent工作流程.png",
     "public/截屏2026-05-18 10.42.47.png",
-    "src/content/blog/OnCallAgent.md",
     "public/images/posts/OnCallAgent",
     "public/images/posts/未命名.md",
     "public/images/posts",
@@ -221,7 +223,6 @@
     "dist/client/projects/index.html",
     "dist/client/images/panda.JPG",
     "dist/client/images/background.jpg",
-    "dist/client/favicon.svg",
     "src/content/blog/hack-agent.md",
     "src/content/blog/hot-100.md",
     "src/content/blog/Sec.md",
@@ -232,7 +233,6 @@
     "node_modules/@cloudflare/vite-plugin/README.md",
     "node_modules/@astrojs/cloudflare/README.md",
     "node_modules/@astrojs/underscore-redirects/README.md",
-    "node_modules/miniflare/dist/local-explorer-ui/favicon.svg",
     "node_modules/miniflare/README.md",
     "node_modules/wrangler/README.md",
     "node_modules/@jridgewell/resolve-uri/README.md",
@@ -245,7 +245,6 @@
     "node_modules/undici/types/README.md",
     "node_modules/undici/README.md",
     "node_modules/undici/docs/docs/api/api-lifecycle.md",
-    "node_modules/undici/docs/docs/api/WebSocket.md",
-    "dist/_astro/blog-placeholder-about.BtEdEmGp_2eecaz.webp"
+    "node_modules/undici/docs/docs/api/WebSocket.md"
   ]
 }

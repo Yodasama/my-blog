@@ -1212,7 +1212,495 @@ async def query_stream(self,question:str, session_id:str) -> AsyncGenerator:
 	yield {"type":"complete"}
 ```
 #### SSE接口层
-
+`chat_stream`接口将`query_stream`产生的事件包装成SSE格式推送给客户端，不同类型的时间对应不同的前端展示逻辑：
 ```python
+@router.post("/chat_stream")
+async def chat_stream(request:CHatRequest):
+	async def event_generator():
+		async for chunk in rag_agent_service.query_stream(request.question,session_id = request.id):
+			chunk_type = chunk.get("type")
+			
+			if chunk_type == "content":
+			# 逐token文本内容
+				yield {
+					"event":"message",
+					"data":json.dumps({"type":"content","data": chunk["data"]},ensure_ascii=False)
+				}
+			elif chunk_type == "tool_call":
+				# 工具调用状态（前端可展示“正在搜索知识库···”等提示）
+				yield {
+					"event": "message",
+					"data": json.dumps({"type":"tool_call","data": chunk["data"]},ensure_ascii = False)
+				}
+			elif chunk_type == "complete":
+				# 完成信号
+				yield {
+					"event": "message",
+					"data": json.dumps({"type":"done","data":chunk.get("data")},ensure_ascii = False)
+				}
+			elif chunk_type == "error":
+				yield {
+					"event": "message",
+					"data": json.dumps({"type":"error","data":str(chunk["data"])},ensure_ascii=Flase)
+				}
+	return EventSourceResponse(event_generator())
+```
+curl调用示例：
+```shell
+# 非流式对话
+curl -X POST http://localhost:8000/api/chat \
+	-H "Content-Type: application/json" \
+	-d '{"id": "session-001", "question": "CPU使用率过高怎么排查？"}'
+	
+# 流式对话(SSE)
+curl - X POST http://localhost:8000/api/chat_stream \
+	-H "Content-Type: application/json" \
+	-d '{"id": "session-001", "question": "CPU使用率过高怎么排查？"}'
+```
 
+## 源码分析：API接口与Agent的整合
+### 对话接口的定义
+#### 快速对话接口
+与大模型对话，相同id的计划带有上下文记忆功能
+请求方法：`POST /api/chat`
+请求字段：
+
+| 字段名      | 类型     | 描述      |
+| -------- | ------ | ------- |
+| id       | string | 对话的唯一标识 |
+| Question | string | 用户提问    |
+响应字段：
+
+| 字段名    | 类型     | 描述   |
+| ------ | ------ | ---- |
+| Answer | string | 系统回答 |
+```shell
+# 示例：快速对话
+curl -X POST http://localhost:6872/api/chat \
+	-H "Content-Type: application/json" \
+	-d '{
+		"Id": "session-001",
+		"Question": "什么是人工智能？"
+	}'
+# 响应
+{
+	"message": "OK",
+	"data": {
+		"answer": "AI 的回答内容···"
+	}
+}	
+```
+#### 流式对话接口
+与大模型对话，相同的id的对话有上下文记忆功能，通过SE实现流式输出回答
+请求方法：`POST /api/chat_stream`
+请求字段：
+
+| 字段名      | 类型     | 描述      |
+| -------- | ------ | ------- |
+| id       | string | 对话的唯一标识 |
+| Question | string | 用户提问    |
+响应字段：
+
+| 字段名 | 类型  | 描述  |
+| --- | --- | --- |
+|     |     |     |
+SSE响应格式：
+
+| event类型   | 含义            |
+| --------- | ------------- |
+| connected | 代表连接建立成功      |
+| message   | 回复的文本片段，会多次发送 |
+| error     | 连接异常，断开连接     |
+| done      | 消息推送完毕，断开连接   |
+示例：
+```shell
+# 示例：流式对话
+curl -X POST http://localhost:6872/api/chat \
+	-H "Content-Type: application/json" \
+	-d '{
+		"Id": "session-001",
+		"Question": "什么是人工智能？"
+	}'
+	
+# 响应
+id: <timestamp>
+event: connected
+data: {"status": "connected", "client_id": "session-001"}
+
+id: <timestamp>
+event: message
+data: 人工智能（AI）
+
+id: <timestamp>
+event: message
+data: 的发展历史
+
+id: <timestamp>
+event: message
+data: 可以追溯到···
+
+id: <timestamp>
+event: message
+data: Stream completed
+```
+### 快速对话接口的核心实现- Python
+代码路径：app/api/chat.py 和 app/services/rag_agent_service.py
+1. 接受请求，取出id(session_id)和question
+2. 调用rag_agent_service.query执行Agent推理，thread_id即session_id
+3. LangGraph MemorySaver 自动完成历史消息的读取与写入，无需手动管理
+4. 返回答案
+```python
+@router.post("/chat")
+async def chat(request: ChatRequest):
+	logger.info(f"[会话{request.id}] 收到快速对话请求：{request.question}")
+	
+	# 直接调用Agent，thread_id决定会话隔离，历史消息由MemorySaver自动维护
+	answer = await rag_agent_sercive.query(
+		request.question,
+		session_id = request.id
+	)
+	return {
+		"code": 200,
+		"message": "success",
+		"data": {
+			"success": True,
+			"answer": answer,
+			"errorMessage": None
+		}
+	}
+```
+query方法内部将系统提示+用户问题包装成消息列表，通过agent.ainvoke执行完整的ReAct推理链，并从最后一条消息中取出答案。thread_id与MemorySaver配合，让相同id的请求自动携带历史上下文：
+```python
+async def query(self, question:str, session_id: str) -> str:
+	await self.initialized_agent()
+	
+	messages = [
+		SystemMessage(content = self.system_prompt),
+		HumanMessage(content = question)
+	]
+	
+	# thread_id 相同则自动读取MemorySaver中的历史消息
+	result = await self.agent.ainvoke(
+		input = {"messages": messages},
+		config = {"configurable": {"thread_id": session_id}},
+	)
+	
+	# 取最后一条消息作为最终答案
+	last_message = result["message"][-1]
+	return last_message.content
+```
+会话历史的消息裁剪由`trim_messages_middleware`节点负责，策略是保留第一条系统消息+最近6条消息（约3轮对话），防止多轮对话超出大模型的上下文窗口：
+```python
+def trim_messages_middleware(state: AgentState):
+	messages = state["messages"]
+	if len(messages) <= 7:
+		return None # 消息较少 无需裁剪
+		
+	first_msg = messages[0] # 保留系统消息
+	recent_messages = messages[-6:] if len(messages) % 2 ==0 else messages[-7:]
+	
+	return {
+		"messages":[
+			RemoveMessage(id = REMOVE_ALL_MESSAGES), # 清空所有旧消息
+			*([first_msg] + list(recent_messages)) # 写入保留的消息
+		]
+	}
+```
+
+### 流式对话接口的核心实现-Python
+SSE返回的消息event类型：
+
+| event类型                   | 含义            |
+| ------------------------- | ------------- |
+| message(type = content)   | 回复的文本片段，会多次发送 |
+| message(type = tool_call) | 工具调用状态通知      |
+| message(type = done)      | 消息推送完毕        |
+| message(type = error)     | 发生异常          |
+1. 流式对话的核心是SSE，FastAPI通过`EventSourceResponse`实现，无需手动设置HTTP头
+2. Agent使用`agent.astream`的`stream_mode = "messages"`模式，逐token产生输出
+3. 每次从流中读到文本内容，就通过SSE发送给客户端
+```python
+@router.post("/chat_stream")
+async def chat_stream(request: ChatRequest):
+	async def event_generator():
+		async for chunk in rag_agent_service.query_stream(
+			request.question, session_id = request.id
+		):
+			chunk_type = chunk.get("type")
+			
+			if chunk_type == "content":
+			# 逐token文本片段 实时推送
+				yield {
+					"event": "message",
+					"data": json.dumps({"type": "content", "data": chunk["data"]},ensure_ascii = False)
+				}
+			elif chunk_type == "tool_call":
+				#工具调用状态（前端可展示“正在检索知识库··”等提示）
+				yield {
+					"event": "message",
+					"data": json.dumps({"type": "type_call", "data": chunk.get("data")},ensure_ascii = False)
+				}
+			elif chunk_type == "complete":
+				yield {
+					"event": "message",
+					"data": json.dumps({"type": "done", "data": None},ensure_ascii = False)
+				}
+			elif chunk_type == "error":
+				yield {
+					"event": "message",
+					"data": json.dumps({"type": "error", "data": str(chunk.get("data"))},ensure_ascii = False)
+				}
+	# EventSourceResponse自动处理SSE协议头和连接管理
+	return EventSourceResponse(event_generator())
+```
+`query_stream`方法使用`agent.astream`的`stream_mode = "messages"`模式，每个token触发一次回调，从`content_blocks`中提取文本块后yield给上层：
+```python
+async def query_stream(self, question:str ,session_id: str) -> AsyncGenerator:
+	await self._initialized_agent()
+	
+	messages = [
+		SystemMessage(content = self.system_prompt),
+		HumanMessage(content = question)
+	]
+	
+	async for token,metadata in self.agent.astream(
+		input = {"messages":messages},
+		config = {"configurable":{"thread_id":session_id}},
+		stream_mode = "messages", # 逐token输出模式
+	):
+		if type(token).__name__ in ("AIMessage","AIMessageChunk"):
+			content_blocks = getattr(token, 'content_blocks',None)
+			if content_blocks:
+				for block in content_blocks:
+					if isinstance(block,dict) and block.get('type')
+						text = block.get('text','')
+						if text:
+							yield {"type": "content","data": text}
+							
+	yield {"type":"complete"}						
+```
+# 运维Agent
+## 前置准备：运维的需求 场景 价值分析
+### 为什么需要Agent
+1. 有经验的工程师熟悉的情况，新人完全不了解
+2. 80%的告警都是“老面孔”，但是仍需要重复查明
+3. 各个系统是割裂的，排查需要来回切换
+
+**运维Agent怎么解决这种问题？**
+Agent可以通过调用各个平台的API，实现跨系统联动。当一条告警进来，Agent可以
+1. 从告警信息中自动提取关键信息（服务名，接口名，时间范围）
+2. 用这些信息调取日志平台的API，拉取相关日志
+3. 同时调监控平台的API，拉回对应时间段的指标数据
+4. 所有信息汇总在一起，生成结构化的排查报告
+### 运维Agent的目标是什么
+1. 降低告警响应时间
+2. 减少人工介入频率
+3. 标准化排查流程
+4. 沉淀和传承团队经验
+
+### 运维Agent有哪些核心能力
+#### 实时告警响应与自动排查
+场景：告警显示“订单服务接口失败率突增25%”
+Agent操作：
+1. 自动调用API，查询最近1小时包含错误关键词的日志
+2. 发现90%的错误日志都是`context canceled`（上下文取消，通常意味着请求超时被主动中断）
+3. 调用监控API，拉取下游支付服务的响应时间曲线
+4. 发现下游支付服务的P99响应时间(99%的请求都在这个时间内完成) 从200ms飙升到3s
+5. 匹配知识库，找到规则：“下游响应时间异常导致context canceled -> 联系下游团队确认是否在发布”
+#### 智能匹配根因
+工程师内部会维护一个 错误码 / 错误特征 的知识库
+
+| 错误特征                | 可能的根因          | 建议操作             |
+| ------------------- | -------------- | ---------------- |
+| context canceled占比高 | 下游服务响应慢，导致请求超时 | 查看下游服务状况，联系对应团队  |
+| connection refused  | 目标服务实例挂了或端口不同  | 检查目标服务是否正常运行     |
+| 数据库连接池耗尽            | 慢查询过多或连接泄漏     | 查看慢查询日志，检查连接释放逻辑 |
+Agent查完日志，拿到错误特征，在这个知识库中找匹配项，然后给出对应的处理建议。
+Agent不会遗漏某个步骤
+#### 经验沉淀的自动化闭环
+处理告警 -> 总结本次排查过程 -> 更新知识库 -> 类似问题直接复用
+## Plan-Execute-Replan架构设计
+### 什么是Plan-Execute-Replan
+Plan-Execute-Replan是一种Multi-Agent（多智能体）协作的任务执行模式，核心思路是：先规划、再执行、随时调整
+### 三个核心组件
+Planner(规划器)：整个模式的起点，接受用户的目标，生成一份结构化的执行计划
+```shell
+# 什么是结构化
+1. 步骤1：调用日志工具，查询xxx日志
+2. 步骤2：调用监控工具，获取进程占用排行
+3. 步骤3：调用历史工单，检索该过程过往的异常处理方案
+```
+关键能力：理解复杂目标的内在逻辑，把大任务拆成可执行的小步骤，并安排好合理的执行顺序
+
+Executor(执行器)：按照计划进行相应的操作，Executor只专注做好当前这一步，不操心全局。
+关键能力：准确调用工具，处理工具返回的结果
+
+RePlanner(重规划器)：每次Executor完成这一步之后，Replanner都会介入
+1. 步骤完成，结果有效 -> 继续推进
+2. 结果不符合预期 -> 调整计划
+3. 所有步骤完成 -> 终止任务，输出结论
+关键能力：评估执行结果、判断任务进度、识别问题并动态优化计划
+
+### 工作流程：从目标到结果的完整闭环
+场景：凌晨CPU100%告警
+Round1: Planner，制定初始计划
+	调用相关工具，查看日志等。
+	先看日志有没有直接线索 -> 再看监控定位具体进程 -> 最后查历史方案
+Round2: Exeutor执行步骤1 -- 查日志
+	返回结果：日志中未发现error/warn记录，只有大量info级别的定时任务执行成功日志
+	没有查到有用信息
+Round3: Replanner介入评估，调整计划
+	分析结果：日志无异常，大概率不是应用报错导致；有可能是某个进程在吃CPU，优先看监控数据，定位异常进程。
+```shell
+步骤1(已完成)：查日志 -> 无异常
+步骤2(更新)： 调用监控工具，获取某时段进程占用排行 <- 优先执行这个
+步骤3(更新)： 针对步骤2定位的异常进程，查其详细日志
+步骤4： 调用历史工单，检索处理方案
+```
+Round4: Executor 执行更新后的步骤2 -- 查监控
+	调用监控工具，查询CPU突增时段的进程排行
+	返回结果：xx - xx时段，进程`data-service`CPU占用率高达95%
+Round5: Replanner再次评估
+	已经定位到了异常进程，接下来要查这个进程的详细日志，继续执行步骤3
+Round6: Executor 执行步骤3 -- 查进程日志
+	Executor调用日志工具，进程名`data-service`，时间范围 = 近1小时
+	返回结果：日志显示xx时间触发了什么任务
+Round7: Replanner最终评估 -- 任务结束
+	根因已经明确了，执行了xx任务。最终输出故障根因 与 建议方案
+### 与ReAct模式的区别
+Reasoning + Acting ：边想边做。没有预先的完整计划 每一步都是临场决策
+Plan-Execute-Replan：按导航开车，遇到阻碍，重新规划
+
+| 对比维度    | Plan-Execute-Replan     | ReAct              |
+| ------- | ----------------------- | ------------------ |
+| 核心思路    | 先拆步骤，按计划执行，动态调整         | 边想边做，每步临场决策        |
+| 有没有全局计划 | 有，一开始就生成完整计划            | 无，走一步看一步           |
+| 适合什么场景  | 多步骤、流程化的复杂任务（运维排查、报告生成） | 灵活探索类任务（开放问答、信息检索） |
+| 任务进度    | 可追踪，知道执行到第几步了           | 不太好追踪，因为没有预设步骤     |
+| 应对变化    | 通过Replan机制调整计划          | 天然灵活，每步都能变方向       |
+| Agent数量 | Multi-Agent协作           | 单Agent完成所有事        |
+Plan-Execute-Replan的场景：
+	任务复杂，步骤多，需要有条理的推进
+ReAct的场景：
+	任务比较灵活，事先不确定具体流程，探索性强
+### 核心优势
+优势一：结构化拆解，把复杂问题变简单
+优势二：动态适应，遇到问题懂得变通
+优势三：职责分离，各司其职更高效
+优势四：任务进度可观测
+## 运维Agent的架构设计
+计划生成 -> 工具执行 -> 动态调整
+### 核心流程拆解
+#### Planner：将经验转化为结构化步骤
+目标：基于告警类型和召回的运维手册，生成可执行的多步骤排查计划，替代人工凭借经验梳理流程的过程。
+核心逻辑：
+	输入：告警信息(alertname , description)+ 召回的处理文档
+	输出：结构化计划，包含步骤描述、工具调用参数、预期结果
+```json
+{
+	"goal": "排查接口失败率过高的问题",
+	"steps": [
+		{
+			"step_id": "1",
+			"action": "query_log",
+			"description": "根据接口名和'response'关键词搜索最近1小时日志",
+			"parameters":{"service":"ad_app", "keyword":"response error","time_range": "1h"},
+			"expected_result":"返回包含error信息的日志片段"
+		},
+		{
+			"step_id": "2",
+			"action": "analyze_error",
+			"description": "解析日志中的error类型，判断是否为'context cancel'",
+			"parameters": {"log_content":"{{step1_result}}"},
+			"expected_result": "明确错误原因（如超时/下游异常）"
+		}
+	]
+}
+```
+#### Executor：调用工具完成单步排查
+目标：通过集成监控/日志工具，自动执行计划中的步骤，替代人工 查日志/查监控的操作
+核心工具示例：
+1. 告警查询工具(`query_prometheus_alerts`)：从Prometheus API获取当前活跃告警详情
+2. 日志查询工具(`query_log`)：通过腾讯云CLS的MCP服务，用自然语言查询日志（如 搜索ad_app最近1小时的response error日志）
+#### Replanner：评估进度并调整策略
+目标：根据Executor的执行结果，判断是否需要调整计划（如增加步骤、终止排查），替代人工 持续关注/判断是否需要进一步处理的决策过程
+评估逻辑：
+- 成功条件：当前步骤符合预期，执行下一步
+- 调整条件：结果不符合预期，触发计划修正
+- 终止条件：达到目标 或 无法继续（需要人工介入）
+## 运维Agent代码实现 - Python
+关键代码放在：app/agent/aiops目录下的state.py 、 planner.py、executor.py、replanner.py，以及app/services/aiops_service.py
+### 流程梳理
+1. Planner：拆解排查步骤，生成执行计划
+2. Executor：从计划中取出第一个步骤，调用工具执行
+3. Replanner：评估执行结果，决定继续、调整计划还是生成最终报告
+三个节点通过LangGraph StateGraph串联，共享同一份PlanExecuteState状态对象在整个流程中传递。
+![[运维Agent工作流程.png]]
+### 代码实战
+#### 状态定义
+整个Plan-Execute-Replan流程的数据通过PlanExecuteState承载，字段设计很简洁
+```python
+class PlanExecuteState(TypeDict):
+	input: str # 用户输入的任务描述
+	plan:List[str] # 代执行的步骤列表
+	past_steps:Annotated[List[tuple],operator.add] # 已执行的步骤历史(追加式更新)
+	response: str # 最终报告/响应
+````
+`past_steps`使用`Annotated[List[tuple],operator.add]`声明，LangGraph会将每次节点返回的`past_steps`自动追加到列表中，而不是覆盖，无需手动维护历史。
+#### Planner节点
+Planner负责制定执行计划，输出一个结构化的步骤列表。核心流程：
+1. 先调用`retrieve_knowledge`查询知识库，寻找历史经验文档
+2. 获取所有可用工具（本地工具 + MCP工具），格式化为文字描述
+3. 将工具列表和经验文档注入prompt，调用LLM生成结构化计划
+```python
+async def planner(state:PlanExecuteState) -> Dict[str,Any]:
+	input_text = state.get("input","")
+	
+	# 1. 查询内部知识库，寻找相关经验
+	context_str = await retrieve_knowledge.ainvoke({"query":input_text})
+	experience_docs = context_str if context_str and context_strip() else ""
+	
+	# 2. 获取所有可用工具（本地 + MCP）
+	local_tools = [get_current_time,retrieve_knowledge]
+	mcp_tools = await (await get_mcp_client_with_retry()).get_tools()
+	all_tools = local_tools + mcp_tools
+	
+	# 3. 调用LLM生成结构化计划
+	llm = ChatQwen(model = config.rag_model,api_key = config.dashscope_api_key,temperature = 0)
+	planner_chain = planner_prompt | llm.with_structured_output(Plan)
+	
+	plan_result = await planner_chain.ainvoke({
+		"messages": [("user", input_text)],
+		"tools_description": format_tools_description(all_tools),
+		"experience_context": experience_docs
+	})
+	
+	return {"plan": plan_results.steps}
+```
+计划的输出格式用Pydantic Plan模型约束，通过`llm.with_structured_output(Plan)`保证LLM的输出可以直接解析为步骤列表：
+```python
+class Plan(BaseModel):
+	steps: List[str] = Field(
+		description = "完成任务所需的不同步骤，按顺序执行，每一步建立在前一步的基础上"
+	)
+```
+#### Planner Prompt
+Planner的系统提示词要求模型将任务分解为逻辑独立的步骤，每步指明使用哪个工具及所需参数。如果查到了经验文档，也会作为参考注入：
+```python
+planner_prompt = ChatPromptTemplate.from_messages([
+	("system","""
+		作为一个专家级别的规划者，你需要将复杂的任务分解为可执行的步骤。
+		可用工具列表（用于制定计划时参考）：{tools_description}
+		
+		注意：你的职责是制定计划，实际的工具调用由Executor负责执行
+		{experience_context}
+		
+		对于给定的任务，创建一个简单的、逐步的计划：
+		-
+		-
+		-
+		-
+	"""),
+	("placeholder","{messages}"),
+])
 ```
