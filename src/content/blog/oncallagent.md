@@ -1768,7 +1768,7 @@ async def replanner(state: PlanExecuteState) -> Dict[str,Any]:
 		#还有剩余步骤 让LLM做决策
 		act = await replanner_chain.ainvoke({
 			"messages":[
-				("user",f"原始任务：{input_text}"),
+				("user",f"原始任务：{input_text}"), 
 			]
 		})
 ```
