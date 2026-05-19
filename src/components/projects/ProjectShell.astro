@@ -1,0 +1,137 @@
+---
+import { projectCategories, recentUpdates, techSummary } from '../../data/projects';
+import '../../styles/project-system.css';
+
+type TocItem = {
+	label: string;
+	href: string;
+};
+
+interface Props {
+	rightMode?: 'index' | 'toc';
+	tocItems?: TocItem[];
+}
+
+const { rightMode = 'index', tocItems = [] } = Astro.props;
+
+const profile = {
+	name: 'Yida',
+	role: 'AI / Security / Research',
+	intro: 'Technical notes, experiments, and project case studies across agents, security, research, and web systems.',
+	github: 'https://github.com/Yodasama',
+	email: 'yidaaa2269@163.com',
+};
+---
+
+<div class="project-shell">
+	<aside class="project-left-sidebar" aria-label="Profile and navigation">
+		<a class="profile-lockup" href="/">
+			<img src="/images/panda.JPG" width="144" height="144" alt={`${profile.name} avatar`} />
+			<span>
+				<strong>{profile.name}</strong>
+				<small>{profile.role}</small>
+			</span>
+		</a>
+		<p class="profile-bio">{profile.intro}</p>
+		<nav class="project-nav" aria-label="Primary navigation">
+			<a href="/">Home</a>
+			<a href="/blog">Articles</a>
+			<a class="active" href="/projects">Projects</a>
+			<a href="/about">About</a>
+		</nav>
+		<div class="project-socials" aria-label="Social links">
+			<a href={profile.github} target="_blank" rel="noreferrer">GitHub</a>
+			<a href={`mailto:${profile.email}`}>Email</a>
+		</div>
+	</aside>
+
+	<main class="project-main">
+		<slot />
+	</main>
+
+	<aside class="project-right-sidebar" aria-label={rightMode === 'toc' ? 'Table of contents' : 'Project tools'}>
+		<div class="right-sidebar-inner">
+			<button class="theme-toggle" type="button" aria-label="Toggle dark mode">
+				<svg viewBox="0 0 24 24" aria-hidden="true">
+					<path d="M12 3v2" />
+					<path d="M12 19v2" />
+					<path d="m4.22 4.22 1.42 1.42" />
+					<path d="m18.36 18.36 1.42 1.42" />
+					<path d="M3 12h2" />
+					<path d="M19 12h2" />
+					<path d="m4.22 19.78 1.42-1.42" />
+					<path d="m18.36 5.64 1.42-1.42" />
+					<circle cx="12" cy="12" r="4" />
+				</svg>
+			</button>
+
+			{
+				rightMode === 'toc' ? (
+					<section class="sidebar-card toc-card">
+						<h2>On This Page</h2>
+						<nav aria-label="Project table of contents">
+							{tocItems.map((item) => (
+								<a href={item.href}>{item.label}</a>
+							))}
+						</nav>
+					</section>
+				) : (
+					<>
+						<section class="sidebar-card">
+							<label class="search-box">
+								<span class="sr-only">Search projects</span>
+								<svg viewBox="0 0 24 24" aria-hidden="true">
+									<path d="m21 21-4.35-4.35" />
+									<circle cx="11" cy="11" r="7" />
+								</svg>
+								<input type="search" placeholder="Search projects" data-project-search />
+							</label>
+						</section>
+						<section class="sidebar-card">
+							<h2>Tags</h2>
+							<div class="side-tags">
+								<button type="button" class="active" data-project-filter="all">All</button>
+								{projectCategories.map((category) => (
+									<button type="button" data-project-filter={category}>{category}</button>
+								))}
+							</div>
+						</section>
+						<section class="sidebar-card">
+							<h2>Recent Updates</h2>
+							<div class="recent-list">
+								{recentUpdates.map((update) => (
+									<a href={update.href}>
+										<span>{update.name}</span>
+										<time>{update.date}</time>
+									</a>
+								))}
+							</div>
+						</section>
+						<section class="sidebar-card">
+							<h2>Tech Stack</h2>
+							<div class="side-tags side-tags-static">
+								{techSummary.map((tech) => (
+									<span>{tech}</span>
+								))}
+							</div>
+						</section>
+					</>
+				)
+			}
+		</div>
+	</aside>
+</div>
+
+<script>
+	const themeButton = document.querySelector('.theme-toggle');
+	const savedTheme = localStorage.getItem('theme');
+
+	if (savedTheme === 'dark') {
+		document.body.classList.add('dark-mode');
+	}
+
+	themeButton?.addEventListener('click', () => {
+		document.body.classList.toggle('dark-mode');
+		localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+	});
+</script>

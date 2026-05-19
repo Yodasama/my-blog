@@ -1,0 +1,180 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import ProjectShell from '../../components/projects/ProjectShell.astro';
+import { SITE_TITLE } from '../../consts';
+import { projects } from '../../data/projects';
+
+const project = projects.find((item) => item.slug === 'oncallagent');
+
+if (!project) {
+	throw new Error('OnCallAgent project metadata is missing.');
+}
+
+const tocItems = [
+	{ label: 'Overview', href: '#overview' },
+	{ label: 'Motivation', href: '#motivation' },
+	{ label: 'Tech Stack', href: '#tech-stack' },
+	{ label: 'Architecture', href: '#architecture' },
+	{ label: 'Core Features', href: '#core-features' },
+	{ label: 'Development Process', href: '#development-process' },
+	{ label: 'Challenges', href: '#challenges' },
+	{ label: 'Lessons', href: '#lessons' },
+	{ label: 'Related Notes', href: '#related-notes' },
+	{ label: 'Links', href: '#links' },
+];
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead
+			title={`OnCallAgent | Projects | ${SITE_TITLE}`}
+			description="OnCallAgent case study: FastAPI, LangGraph, Milvus, MCP, RAG, and AIOps diagnostics."
+		/>
+	</head>
+	<body class="project-system-page">
+		<ProjectShell rightMode="toc" tocItems={tocItems}>
+			<header class="case-study-hero">
+				<p class="eyebrow">AI / Agent Case Study</p>
+				<h1>{project.name}</h1>
+				<p>{project.description}</p>
+				<div class="tech-pills">
+					{project.tags.map((tag) => <span>{tag}</span>)}
+				</div>
+				<div class="case-actions" id="links">
+					{project.links.map((link) => <a href={link.href}>{link.label}</a>)}
+				</div>
+			</header>
+
+			<section class="case-section" id="overview">
+				<h2>Overview</h2>
+				<p>
+					OnCallAgent is a compact operations assistant that combines RAG knowledge retrieval, streaming LLM responses, MCP tool access, and a Plan-Execute-Replan AIOps workflow. The goal is to turn operational context into a readable diagnosis report instead of leaving the user to manually connect logs, metrics, and documentation.
+				</p>
+				<div class="metric-row">
+					{project.metrics?.map((metric) => (
+						<div>
+							<strong>{metric.value}</strong>
+							<span>{metric.label}</span>
+						</div>
+					))}
+				</div>
+			</section>
+
+			<section class="case-section" id="motivation">
+				<h2>Motivation / Why I Built This</h2>
+				<p>
+					运维排障通常需要在多个信息源之间切换：技术文档、日志、监控指标和接口返回。这个项目把这些信息源收敛到 Agent 工作流里，用工具结果约束模型回答，减少纯聊天式问答里的不确定性。
+				</p>
+			</section>
+
+			<section class="case-section" id="tech-stack">
+				<h2>Tech Stack</h2>
+				<p>
+					The backend is built with FastAPI. LangChain and LangGraph coordinate conversation state, tool calling, and the AIOps planning loop. Milvus stores document embeddings for RAG retrieval. MCP servers expose log and monitoring tools. DashScope/Qwen provides the language model layer.
+				</p>
+				<pre><code>FastAPI API routes
+  -> LangGraph Agent workflow
+  -> Milvus-backed RAG retrieval
+  -> MCP log / monitor tools
+  -> DashScope Qwen response generation</code></pre>
+			</section>
+
+			<section class="case-section" id="architecture">
+				<h2>Architecture</h2>
+				<p>
+					The architecture keeps API delivery, agent reasoning, retrieval, and tool execution separate. That separation makes the system easier to debug because each layer can be inspected independently.
+				</p>
+				<div class="architecture-diagram" aria-label="OnCallAgent architecture diagram">
+					<div class="architecture-row">
+						<div class="architecture-node">Static Web UI</div>
+						<div class="architecture-node">FastAPI Gateway</div>
+						<div class="architecture-node">SSE / REST APIs</div>
+					</div>
+					<div class="architecture-row">
+						<div class="architecture-node">LangGraph Planner</div>
+						<div class="architecture-node">Executor</div>
+						<div class="architecture-node">Replanner</div>
+					</div>
+					<div class="architecture-row">
+						<div class="architecture-node">Milvus RAG</div>
+						<div class="architecture-node">MCP Tools</div>
+						<div class="architecture-node">Qwen LLM</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="case-section" id="core-features">
+				<h2>Core Features</h2>
+				<ul>
+					<li>RAG knowledge-base Q&A from uploaded Markdown operations documents.</li>
+					<li>Fast non-streaming chat and SSE streaming chat for different UX needs.</li>
+					<li>AIOps diagnosis flow that plans, executes, replans, and returns a structured report.</li>
+					<li>MCP integration for CLS log querying and Monitor metrics access.</li>
+				</ul>
+				<details>
+					<summary>Technical highlight: Plan-Execute-Replan loop</summary>
+					<div>
+						<p>
+							The diagnosis flow starts with a planner, delegates one step at a time to an executor, then uses a replanner to decide whether to continue or return the final response. This gives long tasks a more stable structure than pure ReAct-style loops.
+						</p>
+					</div>
+				</details>
+			</section>
+
+			<section class="case-section" id="development-process">
+				<h2>Development Process</h2>
+				<div class="timeline">
+					<div class="timeline-item">
+						<time>Phase 1</time>
+						<p>Built the FastAPI application, chat routes, static frontend, and model configuration.</p>
+					</div>
+					<div class="timeline-item">
+						<time>Phase 2</time>
+						<p>Added document upload, Markdown splitting, embeddings, Milvus indexing, and retrieval.</p>
+					</div>
+					<div class="timeline-item">
+						<time>Phase 3</time>
+						<p>Integrated LangGraph AIOps workflow and MCP tools for log and monitor access.</p>
+					</div>
+				</div>
+			</section>
+
+			<section class="case-section" id="challenges">
+				<h2>Challenges & Solutions</h2>
+				<div class="challenge-grid">
+					<div class="challenge-card">
+						<h3>Model endpoint mismatch</h3>
+						<p>DashScope requests initially hit the international endpoint. The fix was to explicitly set the China-region compatible API base URL during local startup.</p>
+					</div>
+					<div class="challenge-card">
+						<h3>Tool reliability</h3>
+						<p>MCP tools can fail or be unavailable. The service keeps local tools available and reports tool-loading failures instead of blocking the entire chat path.</p>
+					</div>
+				</div>
+			</section>
+
+			<section class="case-section" id="lessons">
+				<h2>Lessons Learned</h2>
+				<p>
+					The project clarified that practical agents need strong boundaries: retrieval for grounding, tools for external state, planning for long tasks, and clear report formats for user trust. The best UX is not more automation; it is making each automated step inspectable.
+				</p>
+			</section>
+
+			<section class="case-section" id="related-notes">
+				<h2>Related Notes / Build Logs</h2>
+				<ul>
+					<li><a href="/blog/oncallagent-build/">OnCallAgent actual deployment notes</a></li>
+					<li><a href="/blog/oncallagent-notes/">OnCallAgent learning notes</a></li>
+				</ul>
+			</section>
+
+			<section class="case-section" id="github-demo-links">
+				<h2>GitHub / Demo Links</h2>
+				<div class="case-actions">
+					{project.links.map((link) => <a href={link.href}>{link.label}</a>)}
+				</div>
+			</section>
+		</ProjectShell>
+	</body>
+</html>
