@@ -43,3 +43,42 @@ API文档：``http://localhost:9900
 打开页面后 发现查询失败，codex分析后是聊天模型走了
 `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`国际站
 而不是`https://dashscope.aliyuncs.com/compatible-mode/v1`中国站
+
+在启动9900端口时，先设置这些命令
+```bash
+cd /Users/yida/项目/OnCallAgent
+
+unset http_proxy
+unset https_proxy
+unset HTTP_PROXY
+unset HTTPS_PROXY
+
+set -a
+source .env
+set +a
+
+export DASHSCOPE_API_BASE=https://dashscope.aliyuncs.com/compatible-mode/v1
+export DASHSCOPE_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+export OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+export RAG_MODEL=qwen-plus
+export DASHSCOPE_MODEL=qwen-plus
+
+python -m uvicorn app.main:app --host 127.0.0.1 --port 9900
+```
+然后另开终端测试：
+```bash
+curl --noproxy '*' -i --max-time 60 -X POST "http://127.0.0.1:9900/api/chat" \
+  -H "Content-Type: application/json" \
+  -d '{"Id":"test-session","Question":"你好"}'
+```
+# 结果：
+主页面![[对话助手页面.png]]
+快速模式的回答：
+![[快速模式回复.png]]
+![[快速回答后台样式.png]]
+流式回答：
+![[流式回答后台样式.png]]
+点击AI Ops后，根据当前工具进行查询，然后根据后台已有的技术文档输出制定计划
+![[运维自动规划功能.png]]
+由于使用了FastAPI,自动生成了文档
+![[技术文档.png]]

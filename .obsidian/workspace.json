@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "47b1e80c416b9760",
+        "id": "341add550c912449",
         "type": "tabs",
         "children": [
           {
-            "id": "ae35d18e28e225eb",
+            "id": "23a549aa63f4786d",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "src/content/blog/OnCallAgent-Build.md",
+                "file": "src/content/blog/hack-agent.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "OnCallAgent-Build"
+              "title": "hack-agent"
             }
           }
         ]
@@ -78,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200,
-    "collapsed": true
+    "width": 200
   },
   "right": {
     "id": "bfa354ba62d181e6",
@@ -157,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "src/content/blog/OnCallAgent-Build.md",
+                "file": "src/content/blog/hack-agent.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "OnCallAgent-Build 的大纲"
+              "title": "hack-agent 的大纲"
             }
           },
           {
@@ -198,31 +197,31 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "ae35d18e28e225eb",
+  "active": "23a549aa63f4786d",
   "lastOpenFiles": [
     "src/content/blog/OnCallAgent-Notes.md",
     "src/content/blog/OnCallAgent-Build.md",
+    "public/images/posts/OnCallAgent-Build/技术文档.png",
+    "public/images/posts/OnCallAgent-Build/运维自动规划功能.png",
+    "public/images/posts/OnCallAgent-Build/对话助手页面.png",
+    "public/images/posts/OnCallAgent-Build/快速回答后台样式.png",
+    "public/images/posts/OnCallAgent-Build/流式回答后台样式.png",
+    "public/images/posts/OnCallAgent-Build/快速模式回复.png",
+    "public/images/posts/OnCallAgent-Build",
     "src/content/blog/未命名.base",
-    "public/images/posts/OnCallAgent/运维Agent工作流程.png",
+    "public/images/posts/OnCallAgent-Notes/运维Agent工作流程.png",
     "public/images/posts/OnCallAgent/截屏2026-05-18 17.43.36.png",
-    "public/images/posts/OnCallAgent/对话Agent工作流程.png",
+    "public/images/posts/OnCallAgent-Notes/对话Agent工作流程.png",
     "public/对话Agent工作流程.png",
-    "public/截屏2026-05-18 10.42.47.png",
-    "public/images/posts/OnCallAgent",
+    "public/images/posts/OnCallAgent-Notes",
     "public/images/posts/未命名.md",
     "public/images/posts",
-    "截屏2026-05-18 10.42.47.png",
     "dist/client/sitemap-index.xml",
     "dist/client/sitemap-0.xml",
-    "dist/client/_astro/blog-placeholder-about.BtEdEmGp.jpg",
     "dist/client/_astro/projects.HUUki4zP.css",
     "dist/client/_astro/index.qNukdxJK.css",
     "dist/client/_astro/index.Dh-G4HzG.css",
-    "dist/client/_astro/blog-placeholder-1.Bx0Zcyzv.jpg",
     "dist/client/index.html",
-    "dist/client/rss.xml",
-    "dist/client/images/panda.JPG",
-    "dist/client/images/background.jpg",
     "src/content/blog/hack-agent.md",
     "src/content/blog/hot-100.md",
     "src/content/blog/Sec.md",
@@ -244,7 +243,6 @@
     "node_modules/@cloudflare/unenv-preset/README.md",
     "node_modules/undici/types/README.md",
     "node_modules/undici/README.md",
-    "node_modules/undici/docs/docs/api/api-lifecycle.md",
-    "node_modules/undici/docs/docs/api/WebSocket.md"
+    "node_modules/undici/docs/docs/api/api-lifecycle.md"
   ]
 }
