@@ -31,7 +31,7 @@ Python版本 教程推荐用 - 阿里的大模型
 终端2：Monitor监控服务
 `python mcp_servers/monitor_server.py`
 **启动FastAPI主服务**
-终端3：`python -m uvicorn app.main:app --host 0.0.0.0 -- port 9900`
+终端3：`python -m uvicorn app.main:app --host 0.0.0.0 --port 9900`
 然后访问 `http://localhost:9900`
 API文档：``http://localhost:9900
 **上传知识库文档**
