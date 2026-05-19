@@ -8,29 +8,17 @@
         "type": "tabs",
         "children": [
           {
-            "id": "2e8870e33fa56243",
+            "id": "ae35d18e28e225eb",
             "type": "leaf",
-            "pinned": true,
             "state": {
               "type": "markdown",
               "state": {
-                "file": "src/content/blog/OnCallAgent.md",
+                "file": "src/content/blog/OnCallAgent-Build.md",
                 "mode": "source",
                 "source": false
               },
-              "pinned": true,
               "icon": "lucide-file",
-              "title": "OnCallAgent"
-            }
-          },
-          {
-            "id": "e656d7fabfe63214",
-            "type": "leaf",
-            "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "新标签页"
+              "title": "OnCallAgent-Build"
             }
           }
         ]
@@ -169,13 +157,23 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "src/content/blog/OnCallAgent.md",
+                "file": "src/content/blog/OnCallAgent-Build.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "OnCallAgent 的大纲"
+              "title": "OnCallAgent-Build 的大纲"
+            }
+          },
+          {
+            "id": "00cfec498f980a7e",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
             }
           }
         ],
@@ -188,6 +186,7 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "table-editor-obsidian:Advanced Tables Toolbar": false,
       "switcher:打开快速切换": false,
       "graph:查看关系图谱": false,
       "canvas:新建白板": false,
@@ -199,10 +198,12 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "2e8870e33fa56243",
+  "active": "ae35d18e28e225eb",
   "lastOpenFiles": [
+    "src/content/blog/OnCallAgent-Notes.md",
+    "src/content/blog/OnCallAgent-Build.md",
+    "src/content/blog/未命名.base",
     "public/images/posts/OnCallAgent/运维Agent工作流程.png",
-    "src/content/blog/OnCallAgent.md",
     "public/images/posts/OnCallAgent/截屏2026-05-18 17.43.36.png",
     "public/images/posts/OnCallAgent/对话Agent工作流程.png",
     "public/对话Agent工作流程.png",
@@ -220,7 +221,6 @@
     "dist/client/_astro/blog-placeholder-1.Bx0Zcyzv.jpg",
     "dist/client/index.html",
     "dist/client/rss.xml",
-    "dist/client/projects/index.html",
     "dist/client/images/panda.JPG",
     "dist/client/images/background.jpg",
     "src/content/blog/hack-agent.md",

@@ -1,5 +1,5 @@
 ---
-title: OnCallAgent
+title: OnCallAgent学习记录
 date: 2026-05-11
 summary: 小林Coding的Agent项目学习记录
 tags:
@@ -1261,7 +1261,7 @@ curl - X POST http://localhost:8000/api/chat_stream \
 ## 源码分析：API接口与Agent的整合
 ### 对话接口的定义
 #### 快速对话接口
-与大模型对话，相同id的计划带有上下文记忆功能
+与大模型对话，相同id的对话带有上下文记忆功能
 请求方法：`POST /api/chat`
 请求字段：
 
@@ -2112,41 +2112,43 @@ async def load_mcp_tools_safe(
 ## 前后端接口设计
 ### 后端接口：与前端交互的API接口设计
 ### 对话接口
-与大模型对话，相同id的对话有上下文记忆功能
-请求方法：`POST /api/chat`
+![[#快速对话接口]]
+### 流式对话接口
+![[#流式对话接口]]
+### AI运维接口
+![[#AI运维接口]]
+### 文件上传接口
+该接口用于上传文档到知识库中，便于后续召回使用
+请求方法：`POST /api/upload (multipart/form-data)`
+multipart/form-data:是HTTP请求的一种内容类型（Content-Type），用于在表单中上传文件或二进制数据
 请求字段：
 
-| 字段名      | 类型     | 描述      |
-| -------- | ------ | ------- |
-| id       | string | 对话的唯一标识 |
-| Question | string | 用户提问    |
+| 字段名 | 类型  | 描述  |
+| --- | --- | --- |
+|     |     |     |
 响应字段：
 
-| 字段名    | 类型     | 描述   |
-| ------ | ------ | ---- |
-| Answer | string | 系统回答 |
+| 字段名      | 类型     | 描述       |
+| -------- | ------ | -------- |
+| fileName | string | 保存的文件名   |
+| filePath | string | 文件保存路径   |
+| fileSize | int64  | 文件大小（字节） |
 ```shell
-# 示例 快速对话
-curl -X POST http://localhost:6872/api/chat \
-	-H "Content-Type: application/json"
-	-d '{
-		"Id":"session-001"
-		"Question":"什么是人工智能？"
-	}'
+# 用curl上传一个Markdown文件
+# -F 参数会自动设置multipart/form-data格式
+# @ 符号后面跟文件的绝对路径或相对路径
+curl -X POST http://localhost:6872/api/upload \
+	-F "file = @README.md"
+	
 # 响应
 {
-	"message": "OK",
+	"messages": "OK",
 	"data": {
-		"answer": "AI的回答内容···"
-	}	
+		"fileName": "README.md",
+		"filePath": "/path/to/saved/file/example.txt",
+		"filesize": 1024
+	}
 }
 ```
-### 流式对话接口
-与大模型对话，相同id的对话有上下文记忆功能，通过SSE实现流式输出回答
-请求方法：`POST /api/chat_stream`
-请求字段：
-
-| 字段名      | 类型     | 描述      |
-| -------- | ------ | ------- |
-| id       | string | 对话的唯一标识 |
-| Question | string | 用户提问    |
+## 前端实现
+vibe coding随便搞个
