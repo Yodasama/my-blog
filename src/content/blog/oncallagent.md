@@ -1771,4 +1771,382 @@ async def replanner(state: PlanExecuteState) -> Dict[str,Any]:
 				("user",f"原始任务：{input_text}"), 
 			]
 		})
+		
+		if act.action == "respond":
+			return await _generate_response(state,llm)
+		elif act.action == "replan":
+			# 安全限制：新步骤数不能超过当前剩余步骤数
+			new_steps = act.new_steps[:len(plan)]
+			return {"plan": new_steps}
+		else: # continue
+			reutrn {} # 不改变状态 继续执行下一步
+	else:
+		# 计划已执行完毕 直接生成最终响应
+		return await _generate_response(state,llm)
 ```
+当决定respond 时，`_generate_response`会整理所有执行历史，生成结构化的Markdown报告：
+```python
+async def _generate_response(state,llm) -> Dict[str, Any]:
+	execution_history = "\n\n".join([
+		f"### 步骤:{step}\n**结果:**\n{result}"
+		for step, result in past_steps
+	])
+	
+	response_gen = response_prompt | llm.with_structured_output(Response)
+	response_obj = await response_gen.ainvoke({
+		"messages":[
+			("user",f"原始任务:{input_text}"),
+			("user",f"执行任务:\n{execution_history}"),
+			("user","请基于以上信息生成全面的最终响应"),
+		]
+	})
+	return {"response": response_obj.response}
+```
+#### 构建LangGraph工作流
+三个节点通过StateGraph连接，replanner之后根据状态中是否存在response进行条件路由：
+```python
+def _build_graph(self):
+	workflow = StateGraph(PlanExecuteState)
+	
+	# 添加三个节点
+	workflow.add_node("planner",planner)
+	workflow.add_node("executor",executor)
+	workflow.add_node("replanner",replanner)
+	
+	# 固定边：planner -> executor -> replanner
+	workflow.set_entry_point("planner")
+	workflow.add_edge("planner","executor")
+	workflow.add_edge("executor","replanner")
+	
+	# 条件边：replanner 根据状态决定结束还是继续执行
+	def should_continue(state: PlanExecuteState) -> str:
+		if state.get("response"):
+			return END # 已生成最终响应 结束流程
+		if state.get("plan"):
+			return "executor" # 还有步骤 继续执行
+		return END
+		
+	workflow.add_conditional_edges("planner",should_continue,{
+		"executor": "executor",
+		END: END
+	})
+	
+	return workflow.compile(checkpointer = MemorySaver())
+```
+![[#流程梳理]]
+#### 执行工作流（流式输出）
+`AIOpsService.execute`使用`graph.astream(stream_mode = "updates")`流式执行，每个节点完成后立即产生事件，可以实时推送给前端执行执行进度
+```python
+async def execute(self, user_input: str, session_id: str) -> AsyncGenerator:
+	initialized_state: PlanExecuteSate = {
+		"input": user_input,
+		"plan": [],
+		"past_steps": [],
+		"response": ""
+	}
+	
+	async for event in self.graph.astream(
+		input = initial_state,
+		config = {"configurable": {"thread_id": session_id}},
+		stream_mode = "updates" # 每个节点更新后立即推送
+	):
+		for node_name, node_output in event.items():
+			if node_name == "planner":
+				yield self._format_planner_event(node_output) # type:plan
+			elif node_name == "executor":
+				yield self._format_executor_event(node_output) # type:step_complete
+			elif node_name == "replanner":
+				yield self._format_replanner_event(node_output) # type:report / status
+	
+	# 所有节点完成，推送最终响应
+	final_state = self.graph.get_state({"configurable":{"thread_id": session_id}})
+	final_response = final_state.value.get("response","") if final_state else ""
+	
+	yield {
+		"type": "complete",
+		"stage": "complete",
+		"message": "任务执行完成",
+		"response": final_response
+	}
+```
+流式事件类型说明：
+
+| type          | stage         | 含义               |
+| ------------- | ------------- | ---------------- |
+| plan          | plan_created  | Planner生成了执行计划   |
+| step_complete | step_executed | Executor执行完一个步骤  |
+| report        | final_report  | Replanner生成了最终报告 |
+| status        | 各节点名          | 节点运行中的状态通知       |
+| complete      | complete      | 整个工作流结束          |
+| error         | error         | 执行出错             |
+## API接口与Agent的整合
+### AI运维接口
+AI运维接口，调用后会自动查询现在活跃的告警，并判断根因
+请求方法：POST /api/ai_ops
+请求字段：
+
+| 字段名 | 类型  | 描述  |
+| --- | --- | --- |
+|     |     |     |
+响应字段
+
+| 字段名    | 类型       | 描述     |
+| ------ | -------- | ------ |
+| Result | string   | 结果     |
+| Detail | []string | 详细信息列表 |
+```shell
+curl -X POST http://localhost:6872/api/ai_ops \ 
+	-H "Content-Type: application/json"
+	
+# 响应
+{
+	"messages": "OK",
+	"data": {
+		"result": "汇总的分析结果···",
+		"detail": [
+			"执行步骤1···",
+			"执行步骤2···",
+			"···"
+		]
+	}
+}
+```
+### AI运维接口核心实现 - Python
+代码路径：app/api/aiops.py 和 app/services/aiops_service.py
+1. 接口无需用户传入具体问题，Agent主动查询活跃告警，prompt中已嵌入了完整的诊断任务描述
+2. 接口调用aiops_service.diagnose，内部使用固定的AIOps任务描述 启动Plan-Execute-Replan工作流
+3. 工作流通过grapg.astream流式执行，每个节点完成后立即通过SSE推送事件给前端
+4. 接收到complete 或 error 事件后，关闭SSE流
+```python
+@router.post("/aiops")
+async def diagnose_stream(request: AIOpsRequest):
+	session_id = request.session_id or "default"
+	logger.info(f"[会话{session_id}]收到AIOps诊断请求（流式）")
+	
+	async def event_generator():
+		try:
+			async for event in aiops_service.diagnose(session_id=session_id):
+				# 将每个节点产生的事件序列化后推送给前端
+				yield {
+					"event": "message",
+					"data": json.dumps(event, ensure_ascii=False)
+				}
+				# complete 或 error 时结束流
+				if event.get("type") in ["complete", "error"]:
+					break
+		
+		except Exception as e:
+			yield {
+				"event": "message",
+				"data": json.dumps({
+					"type": "error",
+					"stage": "exception",
+					"message": f"诊断异常:{str(e)}"
+				},ensure_ascii = False)
+			}
+	return EventSourceResponse(event_generator())
+```
+`diagnose`方法内部构造固定的AIOps任务描述，将其传入通用的`execute`方法启动工作流。任务描述中已明确告知Agent该做什么，无需用户填写 -- 这就是这个接口不需要请求参数的原因：
+```python
+async def diagnose(self, session_id: str) -> AsyncGenerator:
+	aiops_task = """诊断当前系统是否存在告警，如果存在告警请详细分析告警原因并生成诊断报告，诊断报告输出格式要求：
+	# 告警分析报告
+	## 活跃告警清单
+	｜告警名称｜级别｜目标服务｜首次触发时间｜最新触发时间｜状态｜
+	···
+	## 告警根因分析 - 【告警名称】
+	···
+	## 处理方案执行 - 【告警名称】
+	···
+	## 结论
+	···
+	重要提醒：所有内容必须基于工具查询的真实数据，严禁编造"""
+	
+	async for event in self.execute(aiops_task, session_id):
+		# 将complete时间转换为包含diagnosis字段的格式
+		if event.get("type") == "complete":
+			yield {
+				"type": "complete",
+				"stage": "diagnosis_complete",
+				"message": "诊断流程完成",
+				"diagnosis": {
+					"status": "completed",
+					"report": event.get("response","")
+				}
+			}
+		else:
+			yield event
+```
+`execute`方法以固定的初始状态启动LangGraph工作流，通过`stream_mode = "updates"`实时推送各节点的执行结果：
+```python
+async def execute(self, user_input: str, session_id: str) -> AsyncGenerator:
+	initial_state: PlanExecuteState = {
+		"input": user_input,
+		"plan": [],
+		"past_steps": [],
+		"response": ""
+	}
+	
+	async for event in self.graph.astream(
+		input = initial_state,
+		config = {"configurable":{"thread_id":session_id}},
+		stream_mode = "updates"
+	):
+		for node_name, node_output in event.items():
+			if node_name == "planner":
+				yield self._format_planner_event(node_output)
+			elif node_name == "executor":
+				yield self._format_executor_event(node_output)
+			elif node_name == "replanner":
+				yield self._format_replanner_event(node_output)
+				
+	# 流程结束 推送最终报告
+	final_state = self.graph.get_state({"configuable":{"thread_id": session_id}})
+	final_response = final_state.values.get("response","") if final_state else ""
+	yield {"type": "complete","stage": "complete","response": final_response}
+```
+# Tool和MCP
+## 方案设计
+### Agent需要哪些Tool？
+#### 对话Agent：
+核心需求：智能问答交互
+所需工具：`query_internal_docs`：该工具基于RAG召回技术，能从向量数据库中快速匹配与问题相关的知识片段。支撑知识检索，回答API鉴权失败怎么办等问题，定位文档关键片段。
+#### 运维Agent：
+核心需求：自动告警响应、日志/监控联动排查、故障根因分析
+所需工具：
+-  `query_prometheus_alerts`:实时获取告警详情
+-  `query_log`：通过腾讯云CLS MCP实现自然语言日志检索（如 xx时间段错误日志）
+-  `get_current_time`：实时获取当前时间
+-  `query_internal_docs`：补充运维经验（如故障处理步骤），形成完整排查闭环
+覆盖了运维Agent的所有需求，其中`query_internal_docs`是支撑其他工具的工具
+### 核心Tool设计
+#### query_prometheus_alerts:告警数据精准提取
+功能定位：实时获取Prometheus告警信息，为大模型提供故障诊断的第一手数据
+实现细节：
+	API对接：调用Prometheus官方告警查询接口 `GET /api/v1/alerts`
+	数据提取逻辑：JSON响应中解析关键字段，结构化输出给大模型
+		`alertname`：告警名称，来自`labels.alertname`
+		`description`：告警详情，来自`annotations.description`
+		`activeAt`：告警触发时间，直接提取`activeAt`字段
+优势：实时性强，能快速获取故障诊断的起点数据
+#### query_internal_docs：知识库精准召回
+功能定位：检索内部文档，为所有Agent提供精准的知识片段检索服务
+实现细节：
+	文档存储：采用向量数据库存储文档，支持语义相似度检索
+	调用触发：当大模型判断需要背景知识是（如 服务下线的处理步骤），自动调用该工具，传入关键词（如 服务下线 处理步骤），返回TopN相关文档片段
+优势：避免大模型幻觉，答案严格基于检索到的事实性内容
+#### get_current_time：时间感知能力补充
+功能定位：解决大模型时间失忆问题，为Agent提供实时时间信息，辅助时间维度的计算
+实现细节：
+	极简接口：极简接口返回多格式时间（秒/毫秒级时间戳、YYYY-MM-DD HH:MM:SS），Agent自动前置调用需时间参数的场景
+	调用时机：当工具需要时间参数时（如 查询过去1小时的告警），Agent自动前置调用该工具。
+核心优势：轻量高效，支撑运维Agent的时间校准需求
+### MCP集成
+#### query_log：自然语言驱动的日志检索
+功能定位：让运维/业务人员用日常语言查询日志，降低技术门槛
+实现细节：
+	MCP对接：集成腾讯云CLS MCP，由MCP自动将自然语言转为查询语句，统一返回结构化日志结果
+	调用逻辑：Agent将用户问题（如 查询服务下线前5分钟的错误日志）直接转发给CLS MCP，MCP自动生成日志查询语句并返回结果，Agent再将结果整理后提交给大模型
+核心优势：
+	低门槛：让业务人员用日常语言查日志（如 服务下线前5分钟的错误日志），无需学Lucene/SQL语法
+	动态适配：MCP自动处理不同日志源的语法差异，统一输出格式
+## 源码分析 - Python
+代码目录：app/tools
+### 当前时间查询工具
+`@tool`会从函数本身自动推导元数据：
+
+| 字段          | 来源                                     |
+| ----------- | -------------------------------------- |
+| name        | 函数名 -> get_current_time                |
+| description | 函数docstring（三引号文档字符串）                  |
+| 参数schema    | 类型注解 + docstring 里的Args：(LangChain会解析) |
+实际跑起来
+```python
+name:get_current_time
+description:'获取当前时间\n\n当用户询问“现在几点”···'
+```
+想显示指定name / description时
+```python
+@tool("current_time",description = "返回指定时区的当前日期时间")
+def get_current_time(timezone: str = "Asia/Shanghai") -> str:
+	···
+```
+```python
+@tool
+def get_current_time(timezone: str = "Asia/Shanghai") -> str:
+	"""获取当前时间
+	当用户询问“现在几点”、“今天星期几”、“今天日期”等时间相关问题时，使用此工具。
+	Args：
+		timezone：时区，默认 Asia/Shanghai
+	
+	Returns:
+		str: 格式化的当前时间信息
+	"""
+	try:
+		#获取指定时区的当前时间
+		tz = ZoneInfo(timezone)
+		now = datetime.now(tz)
+		
+		# 返回格式化的日期时间字符串
+		return now.strftime('%Y-%m-%d %H:%M:%S')
+		
+	except Exception as e:
+		logger.error(f"时间查询工具调用失败：{e}")
+		return f"获取时间失败:{str{e}}"
+```
+### 腾讯云日志MCP工具
+通过MCP Server查询日志服务CLS中存储的日志数据，以实现大模型平台/工具与日志数据的结合。例如使用自然语言查询日志，降低日志查询复杂度
+
+首先创建一个SSE MCP客户端。构建后进行初始化，最后调用`load_mcp_tools_safe`获取所有可用的工具即可。其中`client.get_tools()`是langchain提供的API，只需要会调用即可。
+```python
+async def load_mcp_tools_safe(
+	client:MultiServerMCPClient,
+) -> tuple[list[Union[BaseTool,Any]],str | None]:
+	"""加载MCP工具，失败时返回空列表与可读错误信息，不想上抛出"""
+	try:
+		tools = await client.get_tools()
+		return tools, None
+	except BaseException as e:
+		return [],format_exception_chain(e)
+```
+## 前后端接口设计
+### 后端接口：与前端交互的API接口设计
+### 对话接口
+与大模型对话，相同id的对话有上下文记忆功能
+请求方法：`POST /api/chat`
+请求字段：
+
+| 字段名      | 类型     | 描述      |
+| -------- | ------ | ------- |
+| id       | string | 对话的唯一标识 |
+| Question | string | 用户提问    |
+响应字段：
+
+| 字段名    | 类型     | 描述   |
+| ------ | ------ | ---- |
+| Answer | string | 系统回答 |
+```shell
+# 示例 快速对话
+curl -X POST http://localhost:6872/api/chat \
+	-H "Content-Type: application/json"
+	-d '{
+		"Id":"session-001"
+		"Question":"什么是人工智能？"
+	}'
+# 响应
+{
+	"message": "OK",
+	"data": {
+		"answer": "AI的回答内容···"
+	}	
+}
+```
+### 流式对话接口
+与大模型对话，相同id的对话有上下文记忆功能，通过SSE实现流式输出回答
+请求方法：`POST /api/chat_stream`
+请求字段：
+
+| 字段名      | 类型     | 描述      |
+| -------- | ------ | ------- |
+| id       | string | 对话的唯一标识 |
+| Question | string | 用户提问    |
