@@ -38,3 +38,8 @@ API文档：``http://localhost:9900
 如果aiops-docs / 里已经有markdown文档，执行
 `python -c "import requests, os, time; [requests.post('http://localhost:9900/api/upload', files={'file': open(f'aiops-docs/{f}', 'rb')}) or time.sleep(1) for f in os.listdir('aiops-docs') if f.endswith('.md')]"`
 这一步的作用是：把 aiops-docs 里的 md 文档切分、向量化、写入 Milvus
+
+# 正式部署
+打开页面后 发现查询失败，codex分析后是聊天模型走了
+`https://dashscope-intl.aliyuncs.com/compatible-mode/v1`国际站
+而不是`https://dashscope.aliyuncs.com/compatible-mode/v1`中国站
