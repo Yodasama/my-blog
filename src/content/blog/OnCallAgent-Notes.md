@@ -1636,7 +1636,7 @@ ReAct的场景：
 2. Executor：从计划中取出第一个步骤，调用工具执行
 3. Replanner：评估执行结果，决定继续、调整计划还是生成最终报告
 三个节点通过LangGraph StateGraph串联，共享同一份PlanExecuteState状态对象在整个流程中传递。
-![运维Agent工作流程](/images/posts/OnCallAgent-Notes/aiops-agent-workflow)
+![运维Agent工作流程](/images/posts/OnCallAgent-Notes/aiops-agent-workflow.png)
 ### 代码实战
 #### 状态定义
 整个Plan-Execute-Replan流程的数据通过PlanExecuteState承载，字段设计很简洁
@@ -2112,13 +2112,13 @@ async def load_mcp_tools_safe(
 ```
 ## 前后端接口设计
 ### 后端接口：与前端交互的API接口设计
-### 对话接口
+### 对话接口设计
 [对话接口](#快速对话接口)
-### 流式对话接口
+### 流式对话接口设计
 [流式对话接口](#流式对话接口)
-### AI运维接口
+### AI运维接口设计
 [AI运维接口](#AI运维接口)
-### 文件上传接口
+### 文件上传接口设计
 该接口用于上传文档到知识库中，便于后续召回使用
 请求方法：`POST /api/upload (multipart/form-data)`
 multipart/form-data:是HTTP请求的一种内容类型（Content-Type），用于在表单中上传文件或二进制数据

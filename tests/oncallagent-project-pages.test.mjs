@@ -47,6 +47,9 @@ for (const text of ['OnCallAgent', '项目功能', '项目链接', '页面展示
 
 assert.match(detailPage, /tech-sidebar/, 'Project detail page should place the tech stack in the left sidebar.');
 assert.match(detailPage, /project-detail-main/, 'Project detail page should place project content in the right main area.');
+assert.match(detailPage, /tech-cloud/, 'Project detail page should use a stronger tech-stack presentation.');
+assert.ok(!detailPage.includes("type: 'demo'"), 'Detail page should filter project links instead of rendering every link.');
+assert.ok(!detailPage.includes('showcase-grid'), 'Detail page should stack showcase images vertically.');
 assert.ok(!detailPage.includes('tocItems'), 'Project detail page should not use the old sticky TOC structure.');
 assert.ok(!detailPage.includes('Overview'), 'Project detail page should not use the old case-study section structure.');
 

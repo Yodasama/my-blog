@@ -11,12 +11,14 @@
             "id": "6edc51f2c5d17676",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "public/images/posts/OnCallAgent-Notes/aiops-agent-workflow.png.png"
+                "file": "src/content/blog/OnCallAgent-Notes.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "aiops-agent-workflow.png"
+              "icon": "lucide-file",
+              "title": "OnCallAgent-Notes"
             }
           },
           {
@@ -205,7 +207,7 @@
             }
           }
         ],
-        "currentTab": 5
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
@@ -225,30 +227,31 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "00cfec498f980a7e",
+  "active": "a6fe3a70aa60f677",
   "lastOpenFiles": [
-    "public/images/posts/OnCallAgent-Notes/aiops-agent-workflow.png.png",
-    "src/content/blog/OnCallAgent-Notes.md",
-    "images/posts/OnCallAgent-Notes/运维Agent工作流程.png.md",
-    "images/posts/OnCallAgent-Notes",
-    "images/posts",
-    "images",
-    "dist/client/sitemap-index.xml",
     "dist/client/sitemap-0.xml",
-    "dist/client/_astro/index.Dh-G4HzG.css",
+    "dist/client/sitemap-index.xml",
+    "dist/client/_astro/oncallagent.BhgWsjqX.css",
     "dist/client/_astro/projects.CD_zNIuW.css",
-    "dist/client/_astro/oncallagent.LbsI1GYk.css",
+    "dist/client/_astro/index.Dh-G4HzG.css",
     "dist/client/_astro/index.qNukdxJK.css",
     "dist/client/_astro/blog-placeholder-1.Bx0Zcyzv.jpg",
     "dist/client/_astro/blog-placeholder-about.BtEdEmGp.jpg",
     "dist/client/index.html",
-    "dist/client/images/posts/OnCallAgent-Notes/运维Agent工作流程.png",
-    "dist/client/images/posts/OnCallAgent-Notes/conversation-agent-workflow.png.png",
+    "dist/client/rss.xml",
+    "dist/client/projects/oncallagent/index.html",
+    "dist/client/projects/oncallagent",
+    "dist/client/projects/index.html",
+    "dist/client/images/posts/OnCallAgent-Notes/conversation-agent-workflow.png",
+    "dist/client/images/posts/OnCallAgent-Notes/aiops-agent-workflow.png",
     "dist/client/images/posts/OnCallAgent-Build/运维自动规划功能.png",
     "dist/client/images/posts/OnCallAgent-Build/流式回答后台样式.png",
     "dist/client/images/posts/OnCallAgent-Build/技术文档.png",
     "dist/client/images/posts/OnCallAgent-Build/快速模式回复.png",
     "dist/client/images/posts/OnCallAgent-Build/快速回答后台样式.png",
+    "dist/client/images/posts/OnCallAgent-Build/对话助手页面.png",
+    "src/content/blog/OnCallAgent-Notes.md",
+    "images/posts/OnCallAgent-Notes/运维Agent工作流程.png.md",
     "src/content/blog/OnCallAgent-Build.md",
     "src/content/blog/hack-agent.md",
     "docs/superpowers/plans/2026-05-19-oncallagent-project-page.md",
