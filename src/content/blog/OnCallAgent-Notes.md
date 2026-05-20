@@ -1041,7 +1041,8 @@ Function Call：
 1. 用户输入 -> Embedding -> 向量数据库召回
 2. 构建带上下文(召回内容)的Prompt
 3. ReAct模式多轮交互
-4. 最终输出答案![[对话Agent工作流程.png]] 
+4. 最终输出答案
+![对话Agent工作流程](/images/posts/OnCallAgent-Notes/conversation-agent-workflow.png)
 #### RAG召回：学习外部知识
 目标：从向量数据库中获取与用户问题相关的上下文信息
 步骤：
@@ -1635,7 +1636,7 @@ ReAct的场景：
 2. Executor：从计划中取出第一个步骤，调用工具执行
 3. Replanner：评估执行结果，决定继续、调整计划还是生成最终报告
 三个节点通过LangGraph StateGraph串联，共享同一份PlanExecuteState状态对象在整个流程中传递。
-![[运维Agent工作流程.png]]
+![运维Agent工作流程](/images/posts/OnCallAgent-Notes/aiops-agent-workflow)
 ### 代码实战
 #### 状态定义
 整个Plan-Execute-Replan流程的数据通过PlanExecuteState承载，字段设计很简洁
@@ -1833,7 +1834,7 @@ def _build_graph(self):
 	
 	return workflow.compile(checkpointer = MemorySaver())
 ```
-![[#流程梳理]]
+[点击查看流程](#流程梳理)
 #### 执行工作流（流式输出）
 `AIOpsService.execute`使用`graph.astream(stream_mode = "updates")`流式执行，每个节点完成后立即产生事件，可以实时推送给前端执行执行进度
 ```python
@@ -2112,11 +2113,11 @@ async def load_mcp_tools_safe(
 ## 前后端接口设计
 ### 后端接口：与前端交互的API接口设计
 ### 对话接口
-![[#快速对话接口]]
+[对话接口](#快速对话接口)
 ### 流式对话接口
-![[#流式对话接口]]
+[流式对话接口](#流式对话接口)
 ### AI运维接口
-![[#AI运维接口]]
+[AI运维接口](#AI运维接口)
 ### 文件上传接口
 该接口用于上传文档到知识库中，便于后续召回使用
 请求方法：`POST /api/upload (multipart/form-data)`

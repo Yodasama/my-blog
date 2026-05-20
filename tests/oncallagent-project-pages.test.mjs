@@ -4,30 +4,29 @@ import { strict as assert } from 'node:assert';
 const projectsPage = readFileSync('src/pages/projects.astro', 'utf8');
 const detailPagePath = 'src/pages/projects/oncallagent.astro';
 const projectDataPath = 'src/data/projects.ts';
-const shellPath = 'src/components/projects/ProjectShell.astro';
-const cardPath = 'src/components/projects/ProjectCard.astro';
-const stylesPath = 'src/styles/project-system.css';
 
 assert.match(
 	projectsPage,
-	/ProjectShell/,
-	'Projects page should use the shared ProjectShell component.',
+	/body class="projects-page"/,
+	'Projects page should use the same two-column shell style as Articles.',
 );
 assert.match(
 	projectsPage,
-	/Featured Projects/,
-	'Projects page should include a Featured Projects section.',
+	/projects-panel/,
+	'Projects page should render an Articles-like cards panel.',
 );
 assert.match(
 	projectsPage,
-	/All Projects/,
-	'Projects page should include an All Projects section.',
+	/project-card/,
+	'Projects page should render project cards.',
 );
 assert.match(
 	projectsPage,
-	/projectCategories/,
-	'Projects page should expose project categories for filtering.',
+	/focusCategories/,
+	'Projects page should keep the left sidebar focus filters.',
 );
+assert.ok(!projectsPage.includes('ProjectShell'), 'Projects page should not use the previous three-column ProjectShell.');
+
 assert.match(
 	readFileSync(projectDataPath, 'utf8'),
 	/href:\s*'\/projects\/oncallagent\/'/,
@@ -39,29 +38,18 @@ assert.match(
 	'Projects page should include OnCallAgent as a project.',
 );
 assert.ok(existsSync(detailPagePath), 'OnCallAgent detail page should exist.');
-assert.ok(existsSync(shellPath), 'Projects should use a reusable shell component.');
-assert.ok(existsSync(cardPath), 'Projects should use a reusable card component.');
-assert.ok(existsSync(stylesPath), 'Projects should use a shared design-system stylesheet.');
 
 const detailPage = readFileSync(detailPagePath, 'utf8');
 
-for (const text of [
-	'Overview',
-	'Motivation',
-	'Tech Stack',
-	'Architecture',
-	'Core Features',
-	'Development Process',
-	'Challenges & Solutions',
-	'Lessons Learned',
-	'Related Notes',
-	'GitHub / Demo Links',
-]) {
+for (const text of ['OnCallAgent', '项目功能', '项目链接', '页面展示']) {
 	assert.ok(detailPage.includes(text), `Detail page should include the "${text}" section.`);
 }
 
-assert.match(detailPage, /tocItems/, 'Detail page should define sticky table-of-contents items.');
-assert.match(detailPage, /<details/, 'Detail page should include collapsible technical sections.');
-assert.match(detailPage, /<pre/, 'Detail page should include code snippets.');
-assert.match(stylesPath && readFileSync(stylesPath, 'utf8'), /prefers-reduced-motion/, 'Project styles should respect reduced motion.');
-assert.match(readFileSync(stylesPath, 'utf8'), /backdrop-filter/, 'Project cards should support a soft glass surface.');
+assert.match(detailPage, /tech-sidebar/, 'Project detail page should place the tech stack in the left sidebar.');
+assert.match(detailPage, /project-detail-main/, 'Project detail page should place project content in the right main area.');
+assert.ok(!detailPage.includes('tocItems'), 'Project detail page should not use the old sticky TOC structure.');
+assert.ok(!detailPage.includes('Overview'), 'Project detail page should not use the old case-study section structure.');
+
+for (const image of ['对话助手页面.png', '快速模式回复.png', '运维自动规划功能.png']) {
+	assert.ok(detailPage.includes(image), `Detail page should include showcase image ${image}.`);
+}

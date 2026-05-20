@@ -1,6 +1,5 @@
 ---
 import BaseHead from '../../components/BaseHead.astro';
-import ProjectShell from '../../components/projects/ProjectShell.astro';
 import { SITE_TITLE } from '../../consts';
 import { projects } from '../../data/projects';
 
@@ -10,17 +9,29 @@ if (!project) {
 	throw new Error('OnCallAgent project metadata is missing.');
 }
 
-const tocItems = [
-	{ label: 'Overview', href: '#overview' },
-	{ label: 'Motivation', href: '#motivation' },
-	{ label: 'Tech Stack', href: '#tech-stack' },
-	{ label: 'Architecture', href: '#architecture' },
-	{ label: 'Core Features', href: '#core-features' },
-	{ label: 'Development Process', href: '#development-process' },
-	{ label: 'Challenges', href: '#challenges' },
-	{ label: 'Lessons', href: '#lessons' },
-	{ label: 'Related Notes', href: '#related-notes' },
-	{ label: 'Links', href: '#links' },
+const features = [
+	'支持上传 Markdown 运维文档，并通过向量检索增强问答效果。',
+	'提供普通快速回答和 SSE 流式对话两种交互方式。',
+	'通过 Plan-Execute-Replan 工作流完成 AIOps 自动诊断。',
+	'接入 MCP 日志与监控工具，让 Agent 能基于真实观测数据生成报告。',
+];
+
+const showcaseImages = [
+	{
+		src: '/images/posts/OnCallAgent-Build/对话助手页面.png',
+		alt: 'OnCallAgent 对话助手页面',
+		caption: '对话助手页面',
+	},
+	{
+		src: '/images/posts/OnCallAgent-Build/快速模式回复.png',
+		alt: 'OnCallAgent 快速模式回复',
+		caption: '快速模式回复',
+	},
+	{
+		src: '/images/posts/OnCallAgent-Build/运维自动规划功能.png',
+		alt: 'OnCallAgent 运维自动规划功能',
+		caption: '运维自动规划功能',
+	},
 ];
 ---
 
@@ -29,152 +40,504 @@ const tocItems = [
 	<head>
 		<BaseHead
 			title={`OnCallAgent | Projects | ${SITE_TITLE}`}
-			description="OnCallAgent case study: FastAPI, LangGraph, Milvus, MCP, RAG, and AIOps diagnostics."
+			description="OnCallAgent project detail page."
 		/>
 	</head>
-	<body class="project-system-page">
-		<ProjectShell rightMode="toc" tocItems={tocItems}>
-			<header class="case-study-hero">
-				<p class="eyebrow">AI / Agent Case Study</p>
-				<h1>{project.name}</h1>
-				<p>{project.description}</p>
-				<div class="tech-pills">
-					{project.tags.map((tag) => <span>{tag}</span>)}
+	<body class="project-detail-page">
+		<div class="detail-shell">
+			<aside class="tech-sidebar" aria-label="项目技术栈">
+				<a class="back-link" href="/projects">Back to Projects</a>
+				<div class="tech-sidebar-card">
+					<p>Tech Stack</p>
+					<h1>{project.name}</h1>
+					<div class="tech-list">
+						{project.tags.map((tag) => <span>{tag}</span>)}
+					</div>
 				</div>
-				<div class="case-actions" id="links">
-					{project.links.map((link) => <a href={link.href}>{link.label}</a>)}
-				</div>
-			</header>
+			</aside>
 
-			<section class="case-section" id="overview">
-				<h2>Overview</h2>
-				<p>
-					OnCallAgent is a compact operations assistant that combines RAG knowledge retrieval, streaming LLM responses, MCP tool access, and a Plan-Execute-Replan AIOps workflow. The goal is to turn operational context into a readable diagnosis report instead of leaving the user to manually connect logs, metrics, and documentation.
-				</p>
-				<div class="metric-row">
-					{project.metrics?.map((metric) => (
-						<div>
-							<strong>{metric.value}</strong>
-							<span>{metric.label}</span>
+			<main class="project-detail-main">
+				<nav class="detail-nav" aria-label="主导航">
+					<div class="nav-links">
+						<a href="/">Home</a>
+						<a href="/blog">Articles</a>
+						<a class="active" href="/projects">Projects</a>
+						<a href="/about">About</a>
+					</div>
+					<button class="theme-toggle" type="button" aria-label="切换明暗主题">
+						<svg viewBox="0 0 24 24" aria-hidden="true">
+							<path d="M12 3v2" />
+							<path d="M12 19v2" />
+							<path d="m4.22 4.22 1.42 1.42" />
+							<path d="m18.36 18.36 1.42 1.42" />
+							<path d="M3 12h2" />
+							<path d="M19 12h2" />
+							<path d="m4.22 19.78 1.42-1.42" />
+							<path d="m18.36 5.64 1.42-1.42" />
+							<circle cx="12" cy="12" r="4" />
+						</svg>
+					</button>
+				</nav>
+
+				<article class="detail-card">
+					<header class="project-title-block">
+						<p>AI / Agent Project</p>
+						<h2>{project.name}</h2>
+						<p>{project.description}</p>
+					</header>
+
+					<section class="detail-section" aria-labelledby="features-title">
+						<h3 id="features-title">项目功能</h3>
+						<ul class="feature-list">
+							{features.map((feature) => <li>{feature}</li>)}
+						</ul>
+					</section>
+
+					<section class="detail-section" aria-labelledby="links-title">
+						<h3 id="links-title">项目链接</h3>
+						<div class="project-link-list">
+							{project.links.map((link) => <a href={link.href}>{link.label}</a>)}
 						</div>
-					))}
-				</div>
-			</section>
+					</section>
 
-			<section class="case-section" id="motivation">
-				<h2>Motivation / Why I Built This</h2>
-				<p>
-					运维排障通常需要在多个信息源之间切换：技术文档、日志、监控指标和接口返回。这个项目把这些信息源收敛到 Agent 工作流里，用工具结果约束模型回答，减少纯聊天式问答里的不确定性。
-				</p>
-			</section>
+					<section class="detail-section" aria-labelledby="showcase-title">
+						<h3 id="showcase-title">页面展示</h3>
+						<div class="showcase-grid">
+							{
+								showcaseImages.map((image) => (
+									<figure>
+										<img src={image.src} alt={image.alt} loading="lazy" />
+										<figcaption>{image.caption}</figcaption>
+									</figure>
+								))
+							}
+						</div>
+					</section>
+				</article>
+			</main>
+		</div>
 
-			<section class="case-section" id="tech-stack">
-				<h2>Tech Stack</h2>
-				<p>
-					The backend is built with FastAPI. LangChain and LangGraph coordinate conversation state, tool calling, and the AIOps planning loop. Milvus stores document embeddings for RAG retrieval. MCP servers expose log and monitoring tools. DashScope/Qwen provides the language model layer.
-				</p>
-				<pre><code>FastAPI API routes
-  -> LangGraph Agent workflow
-  -> Milvus-backed RAG retrieval
-  -> MCP log / monitor tools
-  -> DashScope Qwen response generation</code></pre>
-			</section>
+		<script>
+			const themeButton = document.querySelector('.theme-toggle');
+			const savedTheme = localStorage.getItem('theme');
 
-			<section class="case-section" id="architecture">
-				<h2>Architecture</h2>
-				<p>
-					The architecture keeps API delivery, agent reasoning, retrieval, and tool execution separate. That separation makes the system easier to debug because each layer can be inspected independently.
-				</p>
-				<div class="architecture-diagram" aria-label="OnCallAgent architecture diagram">
-					<div class="architecture-row">
-						<div class="architecture-node">Static Web UI</div>
-						<div class="architecture-node">FastAPI Gateway</div>
-						<div class="architecture-node">SSE / REST APIs</div>
-					</div>
-					<div class="architecture-row">
-						<div class="architecture-node">LangGraph Planner</div>
-						<div class="architecture-node">Executor</div>
-						<div class="architecture-node">Replanner</div>
-					</div>
-					<div class="architecture-row">
-						<div class="architecture-node">Milvus RAG</div>
-						<div class="architecture-node">MCP Tools</div>
-						<div class="architecture-node">Qwen LLM</div>
-					</div>
-				</div>
-			</section>
+			if (savedTheme === 'dark') {
+				document.body.classList.add('dark-mode');
+			}
 
-			<section class="case-section" id="core-features">
-				<h2>Core Features</h2>
-				<ul>
-					<li>RAG knowledge-base Q&A from uploaded Markdown operations documents.</li>
-					<li>Fast non-streaming chat and SSE streaming chat for different UX needs.</li>
-					<li>AIOps diagnosis flow that plans, executes, replans, and returns a structured report.</li>
-					<li>MCP integration for CLS log querying and Monitor metrics access.</li>
-				</ul>
-				<details>
-					<summary>Technical highlight: Plan-Execute-Replan loop</summary>
-					<div>
-						<p>
-							The diagnosis flow starts with a planner, delegates one step at a time to an executor, then uses a replanner to decide whether to continue or return the final response. This gives long tasks a more stable structure than pure ReAct-style loops.
-						</p>
-					</div>
-				</details>
-			</section>
-
-			<section class="case-section" id="development-process">
-				<h2>Development Process</h2>
-				<div class="timeline">
-					<div class="timeline-item">
-						<time>Phase 1</time>
-						<p>Built the FastAPI application, chat routes, static frontend, and model configuration.</p>
-					</div>
-					<div class="timeline-item">
-						<time>Phase 2</time>
-						<p>Added document upload, Markdown splitting, embeddings, Milvus indexing, and retrieval.</p>
-					</div>
-					<div class="timeline-item">
-						<time>Phase 3</time>
-						<p>Integrated LangGraph AIOps workflow and MCP tools for log and monitor access.</p>
-					</div>
-				</div>
-			</section>
-
-			<section class="case-section" id="challenges">
-				<h2>Challenges & Solutions</h2>
-				<div class="challenge-grid">
-					<div class="challenge-card">
-						<h3>Model endpoint mismatch</h3>
-						<p>DashScope requests initially hit the international endpoint. The fix was to explicitly set the China-region compatible API base URL during local startup.</p>
-					</div>
-					<div class="challenge-card">
-						<h3>Tool reliability</h3>
-						<p>MCP tools can fail or be unavailable. The service keeps local tools available and reports tool-loading failures instead of blocking the entire chat path.</p>
-					</div>
-				</div>
-			</section>
-
-			<section class="case-section" id="lessons">
-				<h2>Lessons Learned</h2>
-				<p>
-					The project clarified that practical agents need strong boundaries: retrieval for grounding, tools for external state, planning for long tasks, and clear report formats for user trust. The best UX is not more automation; it is making each automated step inspectable.
-				</p>
-			</section>
-
-			<section class="case-section" id="related-notes">
-				<h2>Related Notes / Build Logs</h2>
-				<ul>
-					<li><a href="/blog/oncallagent-build/">OnCallAgent actual deployment notes</a></li>
-					<li><a href="/blog/oncallagent-notes/">OnCallAgent learning notes</a></li>
-				</ul>
-			</section>
-
-			<section class="case-section" id="github-demo-links">
-				<h2>GitHub / Demo Links</h2>
-				<div class="case-actions">
-					{project.links.map((link) => <a href={link.href}>{link.label}</a>)}
-				</div>
-			</section>
-		</ProjectShell>
+			themeButton?.addEventListener('click', () => {
+				document.body.classList.toggle('dark-mode');
+				localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+			});
+		</script>
 	</body>
 </html>
+
+<style>
+	:global(body.project-detail-page) {
+		min-height: 100vh;
+		background:
+			radial-gradient(circle at 72% 4%, rgba(72, 122, 255, 0.12), transparent 32rem),
+			linear-gradient(90deg, #f5f7fb 0, #f5f7fb 19.5rem, #ffffff 19.5rem);
+		color: #111827;
+		font-size: 16px;
+		line-height: 1.5;
+	}
+
+	:global(body.project-detail-page.dark-mode) {
+		background:
+			radial-gradient(circle at 72% 4%, rgba(96, 165, 250, 0.16), transparent 32rem),
+			linear-gradient(90deg, #0f172a 0, #0f172a 19.5rem, #111827 19.5rem);
+		color: #e5e7eb;
+	}
+
+	:global(body.project-detail-page a) {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.detail-shell,
+	.detail-shell * {
+		box-sizing: border-box;
+	}
+
+	.detail-shell {
+		display: grid;
+		grid-template-columns: 19.5rem minmax(0, 1fr);
+		min-height: 100svh;
+	}
+
+	.tech-sidebar {
+		position: sticky;
+		top: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		height: 100svh;
+		padding: 2rem;
+		border-right: 1px solid rgba(148, 163, 184, 0.22);
+	}
+
+	.back-link {
+		color: #2563eb;
+		font-size: 0.84rem;
+		font-weight: 800;
+	}
+
+	.tech-sidebar-card {
+		display: grid;
+		gap: 0.9rem;
+		padding-top: 1.1rem;
+		border-top: 1px solid rgba(148, 163, 184, 0.28);
+	}
+
+	.tech-sidebar-card p {
+		margin: 0;
+		color: #6b7280;
+		font-size: 0.72rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.tech-sidebar-card h1 {
+		margin: 0;
+		color: #030712;
+		font-size: 1.55rem;
+		line-height: 1.1;
+	}
+
+	.tech-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.tech-list span {
+		padding: 0.24rem 0.62rem;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.74);
+		color: #4b5563;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+		font-size: 0.72rem;
+		font-weight: 800;
+	}
+
+	.project-detail-main {
+		display: grid;
+		grid-template-rows: 2.55rem minmax(0, 1fr);
+		gap: 0.9rem;
+		width: 100%;
+		max-width: 78rem;
+		height: 100svh;
+		margin: 0 auto;
+		padding: 1rem 2rem 1.25rem;
+		overflow: hidden;
+	}
+
+	.detail-nav {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		min-width: 0;
+	}
+
+	.nav-links {
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+	}
+
+	.nav-links a {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 2.35rem;
+		padding: 0 0.95rem;
+		border-radius: 999px;
+		font-size: 0.9rem;
+		font-weight: 700;
+		transition:
+			background 180ms ease,
+			box-shadow 180ms ease;
+	}
+
+	.nav-links a.active,
+	.nav-links a:hover {
+		background: rgba(243, 244, 246, 0.94);
+		box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.12);
+	}
+
+	.theme-toggle {
+		display: grid;
+		place-items: center;
+		width: 2.35rem;
+		height: 2.35rem;
+		padding: 0;
+		border: 1px solid rgba(209, 213, 219, 0.86);
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.9);
+		color: #4b5563;
+		box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+		cursor: pointer;
+	}
+
+	.theme-toggle svg {
+		width: 1.05rem;
+		height: 1.05rem;
+		fill: none;
+		stroke: currentColor;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		stroke-width: 1.8;
+	}
+
+	.detail-card {
+		min-height: 0;
+		border: 1px solid rgba(226, 232, 240, 0.92);
+		border-radius: 1.35rem;
+		background: rgba(255, 255, 255, 0.88);
+		box-shadow: 0 22px 80px rgba(15, 23, 42, 0.06);
+		overflow-y: auto;
+	}
+
+	.project-title-block,
+	.detail-section {
+		padding: 1.45rem;
+		border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+	}
+
+	.project-title-block p:first-child {
+		margin: 0 0 0.35rem;
+		color: #64748b;
+		font-size: 0.78rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.project-title-block h2 {
+		margin: 0;
+		color: #0f172a;
+		font-size: clamp(2.4rem, 5vw, 4.5rem);
+		line-height: 0.95;
+	}
+
+	.project-title-block p:last-child {
+		max-width: 48rem;
+		margin: 1rem 0 0;
+		color: #4b5563;
+		font-size: 1rem;
+		line-height: 1.75;
+	}
+
+	.detail-section h3 {
+		margin: 0 0 0.85rem;
+		color: #0f172a;
+		font-size: 1.2rem;
+		line-height: 1.25;
+	}
+
+	.feature-list {
+		display: grid;
+		gap: 0.75rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.feature-list li {
+		padding: 0.9rem 1rem;
+		border: 1px solid rgba(226, 232, 240, 0.92);
+		border-radius: 0.9rem;
+		background: rgba(248, 250, 252, 0.82);
+		color: #4b5563;
+		font-size: 0.92rem;
+		line-height: 1.65;
+	}
+
+	.project-link-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.65rem;
+	}
+
+	.project-link-list a {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 2.25rem;
+		padding: 0 0.9rem;
+		border: 1px solid rgba(209, 213, 219, 0.86);
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.9);
+		color: #111827;
+		font-size: 0.86rem;
+		font-weight: 800;
+		transition:
+			border-color 180ms ease,
+			box-shadow 180ms ease,
+			transform 180ms ease;
+	}
+
+	.project-link-list a:hover {
+		border-color: rgba(37, 99, 235, 0.34);
+		box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+		transform: translateY(-1px);
+	}
+
+	.showcase-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem;
+	}
+
+	.showcase-grid figure {
+		margin: 0;
+		border: 1px solid rgba(226, 232, 240, 0.92);
+		border-radius: 1rem;
+		background: rgba(248, 250, 252, 0.82);
+		overflow: hidden;
+	}
+
+	.showcase-grid img {
+		display: block;
+		width: 100%;
+		aspect-ratio: 16 / 10;
+		border-radius: 0;
+		object-fit: cover;
+		object-position: top center;
+	}
+
+	.showcase-grid figcaption {
+		padding: 0.75rem 0.9rem;
+		color: #334155;
+		font-size: 0.82rem;
+		font-weight: 800;
+	}
+
+	.detail-section:last-child {
+		border-bottom: 0;
+	}
+
+	:global(body.project-detail-page.dark-mode) .tech-sidebar-card h1,
+	:global(body.project-detail-page.dark-mode) .nav-links a,
+	:global(body.project-detail-page.dark-mode) .project-title-block h2,
+	:global(body.project-detail-page.dark-mode) .detail-section h3,
+	:global(body.project-detail-page.dark-mode) .project-link-list a {
+		color: #f9fafb;
+	}
+
+	:global(body.project-detail-page.dark-mode) .tech-sidebar-card p,
+	:global(body.project-detail-page.dark-mode) .project-title-block p:last-child,
+	:global(body.project-detail-page.dark-mode) .feature-list li,
+	:global(body.project-detail-page.dark-mode) .showcase-grid figcaption {
+		color: #cbd5e1;
+	}
+
+	:global(body.project-detail-page.dark-mode) .detail-card,
+	:global(body.project-detail-page.dark-mode) .theme-toggle,
+	:global(body.project-detail-page.dark-mode) .project-link-list a {
+		border-color: rgba(71, 85, 105, 0.8);
+		background: rgba(15, 23, 42, 0.78);
+	}
+
+	:global(body.project-detail-page.dark-mode) .feature-list li,
+	:global(body.project-detail-page.dark-mode) .showcase-grid figure,
+	:global(body.project-detail-page.dark-mode) .tech-list span,
+	:global(body.project-detail-page.dark-mode) .nav-links a.active,
+	:global(body.project-detail-page.dark-mode) .nav-links a:hover {
+		border-color: rgba(71, 85, 105, 0.8);
+		background: rgba(30, 41, 59, 0.78);
+		color: #e5e7eb;
+	}
+
+	:global(body.project-detail-page.dark-mode) .project-title-block,
+	:global(body.project-detail-page.dark-mode) .detail-section {
+		border-color: rgba(71, 85, 105, 0.8);
+	}
+
+	@media (max-width: 1180px) {
+		.detail-shell {
+			grid-template-columns: 17rem minmax(0, 1fr);
+		}
+
+		:global(body.project-detail-page) {
+			background:
+				radial-gradient(circle at 72% 4%, rgba(72, 122, 255, 0.12), transparent 32rem),
+				linear-gradient(90deg, #f5f7fb 0, #f5f7fb 17rem, #ffffff 17rem);
+		}
+
+		.project-detail-main {
+			padding-inline: 1.35rem;
+		}
+	}
+
+	@media (max-width: 900px) {
+		:global(body.project-detail-page),
+		:global(body.project-detail-page.dark-mode) {
+			background: #f8fafc;
+		}
+
+		:global(body.project-detail-page.dark-mode) {
+			background: #111827;
+		}
+
+		.detail-shell {
+			display: block;
+		}
+
+		.tech-sidebar {
+			position: relative;
+			height: auto;
+			padding: 2rem 1.1rem;
+			border-right: 0;
+			border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+		}
+
+		.project-detail-main {
+			display: block;
+			height: auto;
+			max-width: none;
+			padding: 1rem;
+			overflow: visible;
+		}
+
+		.detail-nav,
+		.nav-links {
+			flex-wrap: wrap;
+		}
+
+		.detail-card {
+			margin-top: 1rem;
+			overflow: visible;
+		}
+	}
+
+	@media (max-width: 620px) {
+		.nav-links a {
+			min-height: 2.15rem;
+			padding: 0 0.72rem;
+			font-size: 0.8rem;
+		}
+
+		.project-title-block,
+		.detail-section {
+			padding: 1.15rem;
+		}
+
+		.showcase-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		*::before,
+		*::after {
+			transition-duration: 0.01ms !important;
+			animation-duration: 0.01ms !important;
+		}
+	}
+</style>
