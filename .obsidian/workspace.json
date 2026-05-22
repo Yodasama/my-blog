@@ -4,23 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "341add550c912449",
+        "id": "e792625b38b23158",
         "type": "tabs",
         "children": [
           {
-            "id": "98a13162ad17baad",
+            "id": "384209ec2694de9d",
             "type": "leaf",
-            "pinned": true,
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "src/content/blog/OnCallAgent-Notes.md",
-                "mode": "source",
-                "source": false
-              },
-              "pinned": true,
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "OnCallAgent-Notes"
+              "title": "新标签页"
             }
           }
         ]
@@ -209,8 +203,9 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "98a13162ad17baad",
+  "active": "384209ec2694de9d",
   "lastOpenFiles": [
+    "src/content/blog/OnCallAgent-Notes.md",
     "dist/client/sitemap-0.xml",
     "dist/client/sitemap-index.xml",
     "dist/client/_astro/oncallagent.BhgWsjqX.css",
@@ -223,7 +218,6 @@
     "dist/client/rss.xml",
     "dist/client/projects/oncallagent/index.html",
     "dist/client/projects/oncallagent",
-    "dist/client/projects/index.html",
     "dist/client/images/posts/OnCallAgent-Notes/conversation-agent-workflow.png",
     "dist/client/images/posts/OnCallAgent-Notes/aiops-agent-workflow.png",
     "dist/client/images/posts/OnCallAgent-Build/运维自动规划功能.png",
@@ -232,7 +226,6 @@
     "dist/client/images/posts/OnCallAgent-Build/快速模式回复.png",
     "dist/client/images/posts/OnCallAgent-Build/快速回答后台样式.png",
     "dist/client/images/posts/OnCallAgent-Build/对话助手页面.png",
-    "src/content/blog/OnCallAgent-Notes.md",
     "images/posts/OnCallAgent-Notes/运维Agent工作流程.png.md",
     "src/content/blog/OnCallAgent-Build.md",
     "src/content/blog/hack-agent.md",
