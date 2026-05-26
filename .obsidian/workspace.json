@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 302.5
+    "width": 302.5,
+    "collapsed": true
   },
   "right": {
     "id": "bfa354ba62d181e6",
@@ -209,8 +210,12 @@
   },
   "active": "384209ec2694de9d",
   "lastOpenFiles": [
-    "src/content/blog/hack-agent.md",
+    "public/images/posts/Middleware/Redis-Cluster.png",
     "src/content/blog/Middleware.md",
+    "public/images/posts/Middleware/Twemproxy.png",
+    "public/images/posts/Middleware",
+    "2026-05-26.md",
+    "src/content/blog/hack-agent.md",
     "src/content/blog/OnCallAgent-Notes.md",
     "dist/client/sitemap-0.xml",
     "dist/client/sitemap-index.xml",
@@ -223,15 +228,12 @@
     "dist/client/index.html",
     "dist/client/rss.xml",
     "dist/client/projects/oncallagent/index.html",
-    "dist/client/projects/oncallagent",
     "dist/client/images/posts/OnCallAgent-Notes/conversation-agent-workflow.png",
     "dist/client/images/posts/OnCallAgent-Notes/aiops-agent-workflow.png",
     "dist/client/images/posts/OnCallAgent-Build/运维自动规划功能.png",
     "dist/client/images/posts/OnCallAgent-Build/流式回答后台样式.png",
     "dist/client/images/posts/OnCallAgent-Build/技术文档.png",
     "dist/client/images/posts/OnCallAgent-Build/快速模式回复.png",
-    "dist/client/images/posts/OnCallAgent-Build/快速回答后台样式.png",
-    "dist/client/images/posts/OnCallAgent-Build/对话助手页面.png",
     "images/posts/OnCallAgent-Notes/运维Agent工作流程.png.md",
     "src/content/blog/OnCallAgent-Build.md",
     "docs/superpowers/plans/2026-05-19-oncallagent-project-page.md",
@@ -252,8 +254,6 @@
     "node_modules/@poppinss/colors/README.md",
     "node_modules/@poppinss/colors/LICENSE.md",
     "node_modules/@cloudflare/kv-asset-handler/README.md",
-    "node_modules/wrangler/node_modules/esbuild/LICENSE.md",
-    "node_modules/wrangler/node_modules/esbuild/README.md",
-    "node_modules/@cloudflare/unenv-preset/README.md"
+    "node_modules/wrangler/node_modules/esbuild/LICENSE.md"
   ]
 }
